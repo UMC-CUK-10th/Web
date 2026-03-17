@@ -1,10 +1,8 @@
-// HTML 요소 선택
 const todoInput = document.getElementById('todo-input') as HTMLInputElement;
 const todoForm = document.getElementById('todo-form') as HTMLFormElement;
 const todoList = document.getElementById('todo-list') as HTMLUListElement;
 const doneList = document.getElementById('done-list') as HTMLUListElement;
 
-// 할 일 및 완료된 작업을 저장할 배열
 type Task = {
   id: number;
   text: string;
@@ -13,12 +11,10 @@ type Task = {
 let todos: Task[] = [];
 let doneTasks: Task[] = [];
 
-// 할 일 텍스트 입력 처리 함수
 const getTodoText = (): string => {
   return todoInput.value.trim();
 };
 
-// 할 일 추가 함수
 const addTodo = (text: string): void => {
   todos.push({ id: Date.now(), text });
   console.log(todos);
@@ -26,16 +22,13 @@ const addTodo = (text: string): void => {
   renderTasks();
 };
 
-// 할 일 상태 변경 (완료로 이동)
 const completeTask = (task: Task): void => {
   todos = todos.filter((t) => t.id !== task.id);
   doneTasks.push(task);
   renderTasks();
 };
 
-// 완료된 할 일 삭제 함수
 const deleteTask = (id: number): void => {
-  // 브라우저 기본 컨펌창 사용
   const isConfirmed = confirm("정말로 삭제하시겠습니까? 🍯");
   
   if (isConfirmed) {
@@ -44,7 +37,6 @@ const deleteTask = (id: number): void => {
   }
 };
 
-// 할 일 아이템 생성 함수
 const createTaskElement = (task: Task, isDone: boolean): HTMLLIElement => {
   const li = document.createElement('li');
   li.classList.add('render-container__item');
@@ -53,13 +45,12 @@ const createTaskElement = (task: Task, isDone: boolean): HTMLLIElement => {
   const button = document.createElement('button');
   button.classList.add('render-container__item-button');
 
-  // 완료 여부에 따른 버튼 텍스트 및 색상 설정
   if (isDone) {
     button.textContent = '삭제';
-    button.style.backgroundColor = '#dc3545'; // 빨간색 (삭제)
+    button.style.backgroundColor = '#dc3545'; 
   } else {
     button.textContent = '완료';
-    button.style.backgroundColor = '#28a745'; // 초록색 (완료)
+    button.style.backgroundColor = '#28a745';
   }
 
   button.addEventListener('click', () => {
@@ -74,7 +65,6 @@ const createTaskElement = (task: Task, isDone: boolean): HTMLLIElement => {
   return li;
 };
 
-// 할 일 목록 렌더링 함수
 const renderTasks = (): void => {
   todoList.innerHTML = '';
   doneList.innerHTML = '';
@@ -90,7 +80,6 @@ const renderTasks = (): void => {
   });
 };
 
-// 폼 제출 이벤트 리스너
 todoForm.addEventListener('submit', (event: Event) => {
   event.preventDefault();
   const text = getTodoText();
@@ -99,6 +88,5 @@ todoForm.addEventListener('submit', (event: Event) => {
   }
 });
 
-// 초기 렌더링
 renderTasks();
 
