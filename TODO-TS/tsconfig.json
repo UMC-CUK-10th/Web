@@ -1,7 +1,7 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-   "target": "es2016", // ECMAScript 2016으로 컴파일
+    "target": "es2016", // ECMAScript 2016으로 컴파일
     "module": "ES2015", // ES2015 모듈 시스템 사용
     "rootDir": "./src", // 소스 파일의 루트 디렉토리
     "outDir": "./dist", // 컴파일된 파일이 저장될 디렉토리
