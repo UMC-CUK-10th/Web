@@ -1,6 +1,6 @@
 ## 요약
 
-> 1주차 미션1: TodoList 만들기
+> ex) 1주차 미션1: TodoList 만들기
 
 <br>
 
