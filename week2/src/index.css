@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
 * {
   margin: 0;
   padding: 0;
@@ -5,11 +8,11 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  font-family: Arial, sans-serif;
   background-color: #eef2f3;
 }
 
@@ -19,6 +22,14 @@ body {
   justify-content: center;
 }
 
+.todo-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  align-items: center;
+}
+
 .todo-container {
   background: white;
   padding: 20px;
@@ -26,6 +37,32 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 350px;
   text-align: center;
+}
+
+.todo-container__topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.todo-container__topbar-spacer {
+  width: 52px;
+}
+
+.theme-toggle {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background-color: #f3f4f6;
 }
 
 .todo-container__header {
@@ -45,6 +82,12 @@ body {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
+  background-color: white;
+  color: #111827;
+}
+
+.todo-container__input::placeholder {
+  color: #9ca3af;
 }
 
 .todo-container__button {
@@ -77,6 +120,7 @@ body {
   margin-bottom: 10px;
   display: flex;
   justify-content: center;
+  color: #111827;
 }
 
 .render-container__list {
@@ -103,6 +147,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+  color: #111827;
 }
 
 .render-container__item-button {
@@ -118,4 +163,57 @@ body {
 
 .render-container__item-button:hover {
   background-color: #c82333;
+}
+
+.render-container__empty {
+  padding: 8px;
+  border-radius: 6px;
+  background: #f9f9f9;
+  text-align: center;
+  color: #6b7280;
+}
+
+.dark .todo-container {
+  background: #1e293b;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.dark .todo-page {
+  background-color: #0f172a;
+}
+
+.dark .theme-toggle {
+  border-color: #475569;
+  background: #334155;
+  color: #f8fafc;
+}
+
+.dark .theme-toggle:hover {
+  background: #475569;
+}
+
+.dark .todo-container__header,
+.dark .render-container__title,
+.dark .render-container__item-text {
+  color: #f8fafc;
+}
+
+.dark .todo-container__input {
+  border-color: #475569;
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+.dark .todo-container__input::placeholder {
+  color: #94a3b8;
+}
+
+.dark .render-container__item,
+.dark .render-container__empty {
+  background: #334155;
+  border-bottom-color: #475569;
+}
+
+.dark .render-container__empty {
+  color: #cbd5e1;
 }
