@@ -1,15 +1,21 @@
-import { useState } from 'react';
-import { useTodo } from '../context/TodoContext';
-
+import { useState } from 'react'; 
+import { useTodo } from '../context/TodoContext'; 
 const TodoInput = () => {
   const [text, setText] = useState('');
+  const [loading, setLoading] = useState(false);
   const { addTodo } = useTodo();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return; 
-    addTodo(text);            
-    setText('');              
+    if (!text.trim()) return;
+
+
+    setLoading(true);
+    setTimeout(() => {
+      addTodo(text);
+      setText('');
+      setLoading(false); 
+    }, 500); 
   };
 
   return (
@@ -19,9 +25,10 @@ const TodoInput = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Enter your task"
+        disabled={loading} 
       />
       <button className="todo-container__button" type="submit">
-        Add Task
+        {loading ? "loading..." : "Add Task"} 
       </button>
     </form>
   );
