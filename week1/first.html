@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Todo List</title>
+<style>
+body{
+  margin:0;
+  padding:40px;
+  display:flex;
+  justify-content:center;
+  background: skyblue;
+}
+.todo-container{
+  width:500px;
+  background: whitesmoke;
+  border-radius:6px;
+  padding: 10px;
+}
+h1,h2{
+  text-align:center;
+}
+.todo-input-box{
+  display:flex;
+}
+input{
+  flex:1;
+  font-size:20px;
+  border:none;
+  margin-right: 5px;
+  
+}
+button{
+  padding:10px 15px;
+  border:none;
+  background:green  ;
+  color:white;
+  cursor:pointer;
+  border-radius:6px;
+}
+.todo-list{
+  display:flex;
+  gap:20px;
+}
+.todo-section{
+  flex:1;
+}
+ul{
+    text-align:left;
+    border-radius:6px;
+    padding:10px;
+    margin:0;
+    list-style:none;
+}
+
+li{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:6px;
+  background:lightgrey;
+}
+.todo-complete-btn{
+  background:green;
+}
+.todo-delete-btn{
+  background:red;
+}
+</style>
+</head>
+<body>
+    <div class="todo-container">
+        <h1>Todo List</h1>
+        <div class="todo-input-box">
+            <input id="todoInput" placeholder="할 일 입력">
+            <button id="addBtn">추가</button>
+        </div>
+
+        <div class="todo-list">
+            <div class="todo-section">
+                <h2>할 일</h2>
+                <ul id="todoList"></ul>
+            </div>
+
+            <div class="todo-section">
+                <h2>완료</h2>
+                <ul id="doneList"></ul>
+            </div>
+        </div>
+    </div>
+
+<script src="./dist/first.js"></script>
+
+</body>
+</html>
