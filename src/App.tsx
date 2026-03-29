@@ -1,12 +1,16 @@
+import { ThemeProvider } from './06-useContext/context/ThemeProvider';
+import Navbar from './06-useContext/Navbar';
+import ThemeContent from './06-useContext/context/ThemeContent';
 import './App.css';
-import Todo from './components/Todo';
-import { TodoProvider } from './context/TodoContext';
 
-function App() : Element {
+function App() {
   return (
-    <TodoProvider>
-      <Todo />
-    </TodoProvider>
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <ThemeContent />
+      </div>
+    </ThemeProvider>
   );
 }
 
