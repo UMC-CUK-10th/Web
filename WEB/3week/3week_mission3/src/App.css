@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  /* 배경을 연한 하늘색으로! 🧊 */
+  --bg: #f0f9ff;           /* sky-50 계열 */
+  --text: #334155;         /* slate-700 (가독성 좋은 진한 회색) */
+  --text-h: #0c4a6e;       /* sky-900 (포인트가 되는 짙은 남색) */
+  --border: #e0f2fe;       /* sky-100 */
+  --code-bg: #f8fafc;
+  
+  /* 버튼과 강조색은 선명한 하늘색으로! 🍯 */
+  --accent: #0ea5e9;       /* sky-500 */
+  --accent-bg: rgba(14, 165, 233, 0.1);
+  --accent-border: rgba(14, 165, 233, 0.5);
+  
+  --shadow: rgba(14, 165, 233, 0.1) 0 10px 15px -3px;
+
+  /* 기존 폰트 설정은 유지 */
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font: 18px/145% var(--sans);
+}
+
+/* 다크모드도 하늘색 톤 유지 (심해 느낌) 🌊 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #082f49;         /* sky-950 */
+    --text: #bae6fd;       /* sky-200 */
+    --text-h: #f0f9ff;     /* sky-50 */
+    --border: #0c4a6e;     /* sky-900 */
+    --accent: #38bdf8;     /* sky-400 */
+  }
+}
+
+#root {
+  /* 1126px로 고정하면 큰 화면에서 답답할 수 있어요! 🐾 */
+  /* max-width를 조금 늘리고 반응형으로 조절합니다. */
+  width: 1280px; 
+  max-width: 95%; 
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: var(--bg); /* 배경색 적용 🍯 */
+}
+
+/* 제목 색상도 변수에 맞게 자동 조절 */
+h1, h2 {
+  color: var(--text-h);
+}
