@@ -1,10 +1,10 @@
 export const LoadingSpinner = () => {
   return (
-    <div
-      className="size-12 animate-spin rounded-full border-6 border-t-transparent border-[#b2dab1]"
-      role="status"
-    >
-      <span className="sr-only">Loading...</span>
-    </div>
+ <div className="relative size-24 flex items-center justify-center" role="status">
+  <div className="text-5xl absolute">🍯</div>
+  <div className="animate-spin text-4xl absolute h-full w-full flex justify-center pt-2">
+    🐝
+  </div>
+</div>
   );
 };
