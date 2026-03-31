@@ -1,26 +1,35 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import MovieDetailPage from "./pages/MovieDetailPage";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import Layout from "./components/Layout"; 
+import Homepage from "./pages/HomePage";
 import MoviePage from "./pages/MoviePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import MovieDetailPage from "./pages/MovieDetailPage";
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        index: true,
+        element: <Homepage />,
+      },
+      {
+        path: "movies/:category",
+        element: <MoviePage />,
+      },
+      {
+        path: "movie/:id",
+        element: <MovieDetailPage />,
+      },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />}>
-          <Route
-            index
-            element={<div className="p-10 text-lg">홈에서 영화 카테고리를 선택하세요.</div>}
-          />
-          <Route path="movies/:category" element={<MoviePage />} />
-          <Route path="movies/:category/:movieId" element={<MovieDetailPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
