@@ -21,3 +21,20 @@ export type MovieResponse = {
   total_pages: number;
   total_results: number;
 };
+
+export type MovieCredit = {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  profile_path: string;
+  cast_id: number;
+  character: string;
+  order: number;
+};
+
+export type MovieCreditResponse = {
+  id: number;
+  cast: MovieCredit[];
+};
