@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import './App.css'
 import Card from './components/Card'
 import Header from './components/Header'
 import InputBar from './components/InputBar'
 import LoadingBar from './components/LoadingBar'
+import { useTheme } from './context/ThemeContext'
 
 interface Todo {
   id: string;
@@ -21,6 +21,8 @@ function App() {
   ]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const { isDarkMode, toggleTheme } = useTheme();
 
   // 2. 할 일 추가 함수
   const addTodo = (text: string) => {
@@ -54,7 +56,38 @@ function App() {
   }
   return (
     <>
-      <main className="w-full min-h-screen flex flex-col items-center justify-center p-4">
+      <main className={
+        `w-full 
+        min-h-screen 
+        flex flex-col 
+        items-center justify-center 
+        p-4 
+        ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+        }`
+      }>
+        <button
+          onClick={toggleTheme}
+          className={
+            `
+            ${isDarkMode ? `bg-blue-500 
+            text-white 
+              px-6 py-2 
+              text-lg
+              cursor-pointer
+              rounded-2xl 
+            hover:bg-blue-600 transition` : 
+            `bg-gray-600 
+            text-white 
+              px-6 py-2 
+              text-lg
+              cursor-pointer
+              rounded-2xl 
+            hover:bg-gray-700 transition`}
+            `
+          }
+        >
+          {isDarkMode ? '🌞 라이트 모드' : '🌙 다크 모드'}
+        </button>
         <Header nickname={nickname}></Header>
 
         <InputBar onAdd={addTodo}></InputBar>
@@ -63,7 +96,7 @@ function App() {
 
         <section className="flex flex-row gap-6 w-full max-w-[600px] justify-center">
           <div className="flex-1">
-            <h2 className="bg-[#FFF9C4] px-6 py-3 rounded-[16px] max-w-[120px] font-semibold mb-4 text-xl text-center mx-auto">할 일</h2>
+            <h2 className={`px-6 py-3 rounded-[16px] max-w-[120px] font-semibold mb-4 text-xl text-center mx-auto ${isDarkMode ? `bg-[#FDD835]` : `bg-[#FFF9C4]` }`}>할 일</h2>
             <ul id="todo_list">
               {todos.filter(t => !t.isDone).map(todo => (
                 <Card key={todo.id} text={todo.text} onToggle={() => toggleTodo(todo.id)} ></Card>
@@ -71,7 +104,7 @@ function App() {
             </ul>
           </div>
           <div className="flex-1">
-            <h2 className='bg-[#E1F5FE] px-6 py-3 rounded-[16px] max-w-[120px] font-semibold mb-4 text-xl text-center mx-auto'>완료</h2>
+            <h2 className={`px-6 py-3 rounded-[16px] max-w-[120px] font-semibold mb-4 text-xl text-center mx-auto ${isDarkMode ? `bg-[#4FC3F7]` : `bg-[#E1F5FE]` }`}>완료</h2>
             <ul id="finish_list">
               {todos.filter(t => t.isDone).map(todo => (
                 <Card key={todo.id} text={todo.text} onToggle={() => toggleTodo(todo.id)} isDone></Card>
