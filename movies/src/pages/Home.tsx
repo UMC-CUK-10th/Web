@@ -1,15 +1,22 @@
-import { useState, useEffect } from "react"
-
 export default function Home() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        console.log("컴포넌트 최초 실행 시 발생")
-    }, [])
+    const items = ["🐹", "🌻", "🐹", "🍌", "🐹", "🍎", "🐹", "🌼"];
+
+
     return (
-        <div>
-            <h1>홈 화면</h1>
-            <p>오늘 보고 싶은 영화 개수: {count}</p>
-            <button onClick={() => setCount(count + 1)}>+1</button>
+        <div className="flex justify-center items-center h-screen w-full">
+            <div className="relative flex justify-center items-center w-40 h-40">
+                <h1 className="absolute text-xl font-black text-blue-600 z-10 whitespace-nowrap">김햄찌의 영화 공간</h1>
+                
+                {/* 무한 회전: 타이틀에 집중하게 하는 요소*/}
+                <div className="relative w-40 h-40 animate-[spin_10s_linear_infinite]">
+                    {items.map((item, idx) => (
+                        // 8개의 아이콘이니 각각 45도씩 떨어져 위치해야함
+                        <span key={idx} className="absolute top-1/2 left-1/2 text-3xl" style={{ transform: `translate(-50%, -50%) rotate(${idx * 45}deg) translateY(-100px) rotate(-${idx * 45}deg)` }}>
+                            {item}
+                        </span>
+                    ))}
+                </div>
+            </div>
         </div>
     )
 }
