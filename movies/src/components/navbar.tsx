@@ -1,6 +1,7 @@
 import MenuLink from "./menuLink"
 
 export default function Navbar() {
+
     return (
         <nav className="
             sticky top-0
