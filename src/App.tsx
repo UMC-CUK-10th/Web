@@ -1,12 +1,12 @@
 import './App.css';
-import MoviePage from './pages/MoviePage';
+import Todo from './components/Todo';
+import { TodoProvider } from './context/TodoContext';
 
 function App() {
-  console.log(import.meta.env.VITE_TMDB_KEY);
   return (
-    <>
-      <MoviePage />
-    </>
+    <TodoProvider>
+      <Todo />
+    </TodoProvider>
   );
 }
 
