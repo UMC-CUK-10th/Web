@@ -1,51 +1,39 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useMemo, useState } from "react";
 import type { Movie, MovieResponse } from "../types/movie";
 import MovieCard from "../components/MovieCard";
 import { LoadingSpinner } from "../components/LoadingSpinner.tsx";
 import { useParams } from "react-router-dom";
+import { useCustomFetch } from "../hooks/useCustomFetch";
 
 export default function MoviePage() {
-  const [movies, setMovies] = useState<Movie[]>([]);
-
-  // 1. 로딩상태
-  const [isPending, setIsPending] = useState(false);
-  // 2. 에러 상태
-  const [isError, setIsError] = useState(false);
-  // 3. 페이지
   const [page, setPage] = useState(1);
-
   const category = useParams<{ category: string }>();
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setIsPending(true);
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
+    }),
+    []
+  );
 
-      try {
-        const { data } = await axios.get<MovieResponse>(
-          `https://api.themoviedb.org/3/movie/${category.category}?language=en-US&page=${page}`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
-            },
-          }
-        );
+  const { data, isLoading, error } = useCustomFetch<MovieResponse>(
+    category.category
+      ? `https://api.themoviedb.org/3/movie/${category.category}`
+      : null,
+    {
+      params: {
+        language: "en-US",
+        page,
+      },
+      headers,
+      errorMessage: "영화 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+    }
+  );
 
-        setMovies(data.results);
-      } catch {
-        setIsError(true);
-      } finally {
-        setIsPending(false);
-      }
-    };
-
-    fetchMovies();
-  }, [page, category]);
-
-  if (isError) {
+  if (error) {
     return (
-      <div>
-        <span className="text-red-500 text-2xl"> 에러가 발생했습니다. </span>
+      <div className="flex items-center justify-center py-20">
+        <span className="text-red-500 text-2xl">{error}</span>
       </div>
     );
   }
@@ -68,17 +56,18 @@ export default function MoviePage() {
         >{`>`}</button>
       </div>
 
-      {isPending && (
+      {isLoading && (
         <div className="flex items-center justify-center h-dvh">
           <LoadingSpinner />
         </div>
       )}
 
-      {!isPending && (
+      {!isLoading && (
         <div className="p-10 grid gap-4 grid-cols-2 sm:grid-cols-3 
         md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {movies &&
-            movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)}
+          {data?.results.map((movie: Movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
         </div>
       )}
     </>
