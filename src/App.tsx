@@ -1,10 +1,13 @@
-import ContextPage from './useContext/context/ContextPage';
 import './App.css';
+import MoviePage from './pages/MoviePage';
 
-export default function App() {
+function App() {
+  console.log(import.meta.env.VITE_TMDB_KEY);
   return (
     <>
-      <ContextPage />
+      <MoviePage />
     </>
   );
 }
+
+export default App;
