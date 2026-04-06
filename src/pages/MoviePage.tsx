@@ -15,13 +15,14 @@ export default function MoviePage() {
   // 3. 페이지 상태
   const [page, setPage] = useState(1);
 
-  const { category } = useParams<{
+  const { category = 'popular' } = useParams<{
     category: string;
   }>();
 
   useEffect(() => {
     const fetchMovies = async () => {
       setIsPending(true);
+      setIsError(false);
 
       try {
         const { data } = await axios.get<MovieResponse>(
@@ -42,7 +43,7 @@ export default function MoviePage() {
     };
 
     fetchMovies();
-  }, [page, category]);
+  }, [category, page]);
 
   if (isError) {
     return (
