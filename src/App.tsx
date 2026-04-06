@@ -1,12 +1,16 @@
+import { ThemeProvider } from './06-useContext/context/ThemeProvider';
+import Navbar from './06-useContext/Navbar';
+import ThemeContent from './06-useContext/context/ThemeContent';
 import './App.css';
-import MoviePage from './pages/MoviePage';
 
 function App() {
-  console.log(import.meta.env.VITE_TMDB_KEY);
   return (
-    <>
-      <MoviePage />
-    </>
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <ThemeContent />
+      </div>
+    </ThemeProvider>
   );
 }
 
