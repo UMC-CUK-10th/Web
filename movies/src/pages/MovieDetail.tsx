@@ -1,107 +1,93 @@
-import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import Loading from "./Loading";
-import axios from "axios";
+import { useMovieDetail } from "../hooks/useMovieDetail";
 
-interface MovieInfo {
-    title: string;
-    overview: string;
-    backdrop_path: string;
-    poster_path: string;
-    vote_average: number;
-    release_date: string;
-    runtime: number; // 분 단위로 들어옵니다.
-    genres: { id: number; name: string }[];
-}
+// import { useEffect, useState } from "react"
+// import axios from "axios";
+// import type { MovieInfo } from "../types/MovieInfo";
+// import type { Person } from "../types/Person";
 
-interface Person {
-    id: number;
-    name: string;
-    role: string; // 출연(character) 혹은 직무(job)를 담을 필드
-    profile_path: string | null;
-}
 
 export default function MovieDetail() {
     const { movieId } = useParams<{ movieId: string }>();
+    const { movie, people, isLoading, error } = useMovieDetail(movieId);
 
-    const [movie, setMovie] = useState<MovieInfo | null>(null);
-    const [loading, setLoading] = useState(true);
+    // const [movie, setMovie] = useState<MovieInfo | null>(null);
+    // const [loading, setLoading] = useState(true);
+    // const [people, setPeople] = useState<Person[]>([]);
 
-    const [people, setPeople] = useState<Person[]>([]);
+    // useEffect(() => {
+    //     const fetched = async () => {
+    //         setLoading(true);
+    //         const config = {
+    //             headers: {
+    //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YjYzMzYyZTRlZjRjYTUyYzY3YzNjODllODI3ZDU4YyIsIm5iZiI6MTc3NTAxMzg2My4wMTksInN1YiI6IjY5Y2M4ZmU2NGQ5ZjY3OWMzZDQ4ZWRhYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.mHP8bw9awM1pMlj4AFPyROa86IxC94F8EqVFRYFug8Y'
+    //             },
+    //             params: {
+    //                 language: "ko-KR"
+    //             }
+    //         };
 
-    useEffect(() => {
-        const fetched = async () => {
-            setLoading(true);
-            const config = {
-                headers: {
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YjYzMzYyZTRlZjRjYTUyYzY3YzNjODllODI3ZDU4YyIsIm5iZiI6MTc3NTAxMzg2My4wMTksInN1YiI6IjY5Y2M4ZmU2NGQ5ZjY3OWMzZDQ4ZWRhYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.mHP8bw9awM1pMlj4AFPyROa86IxC94F8EqVFRYFug8Y'
-                },
-                params: {
-                    language: "ko-KR"
-                }
-            };
+    //         try {
+    //             const [movieRes, creditRes] = await Promise.all([
+    //                 axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, config),
+    //                 axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, config)
+    //             ]);
 
-            try {
-                const [movieRes, creditRes] = await Promise.all([
-                    axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, config),
-                    axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, config)
-                ]);
+    //             setMovie(movieRes.data);
 
-                setMovie(movieRes.data);
+    //             const allPeople = [
+    //                 ...creditRes.data.crew
+    //                     .filter((p: any) => p.job === "Director" || p.job === "Producer")
+    //                     .map((p: any) => ({
+    //                         id: p.id,
+    //                         name: p.name,
+    //                         role: p.job,
+    //                         profile_path: p.profile_path
+    //                     })),
+    //                 ...creditRes.data.cast.slice(0, 15).map((p: any) => ({
+    //                     id: p.id,
+    //                     name: p.name,
+    //                     role: p.character,
+    //                     profile_path: p.profile_path
+    //                 }))
+    //             ];
 
-                const allPeople = [
-                    ...creditRes.data.crew
-                        .filter((p: any) => p.job === "Director" || p.job === "Producer")
-                        .map((p: any) => ({
-                            id: p.id,
-                            name: p.name,
-                            role: p.job,
-                            profile_path: p.profile_path
-                        })),
-                    ...creditRes.data.cast.slice(0, 15).map((p: any) => ({
-                        id: p.id,
-                        name: p.name,
-                        role: p.character,
-                        profile_path: p.profile_path
-                    }))
-                ];
+    //             const unique = Array.from(
+    //                 new Map(allPeople.map((person) => [person.id, person])).values()
+    //             )
 
-                const unique = Array.from(
-                    new Map(allPeople.map((person) => [person.id, person])).values()
-                )
+    //             setPeople(unique);
+    //         } catch {
+    //             console.error("데이터 불러오기 에러")
+    //         }
+    //         setLoading(false)
+    //     }
 
-                setPeople(unique);
-            } catch {
-                console.error("데이터 불러오기 에러")
-            }
-            setLoading(false)
-        }
+    //     if (movieId) {
+    //         fetched();
+    //     }
+    // }, [movieId]);
 
-        if (movieId) {
-            fetched();
-        }
-    }, [movieId]);
-
-    if (loading) {
+    if (isLoading) {
         return <Loading />
     }
 
-    if (!movie) {
+    if (error || !movie) {
         return <div>영화 정보를 찾을 수 없습니다.</div>
     }
 
     return (
         <div className="bg-black text-white min-h-screen">
-            {/* 1. 상단 히어로 섹션 */}
             <div className="relative w-full h-[500px] md:h-[700px] flex items-center justify-center overflow-hidden">
 
                 {/* 배경 이미지 레이어 */}
                 <div className="absolute inset-0 bg-cover bg-center"
                     style={{
-                        backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
+                        backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.overview})`
                     }}
                 >
-                    {/* 그라데이션 오버레이: 중앙 집중형일 때는 사방을 어둡게 하거나 하단 위주 그라데이션이 예쁩니다 */}
+                    
                     <div className="absolute inset-0 bg-black/60 bg-gradient-to-t from-black via-transparent to-black/30"></div>
                 </div>
 
