@@ -4,6 +4,17 @@ import SignupStep2 from "../components/SignupStep2";
 import BouncyText from "../components/BouncyText";
 import SignupStep3 from "../components/SignupStep3";
 
+// 여러 단계로 나누어져 있는 폼
+// 부모가 데이터를 모아서 관리하는 구조 -> 각 스텝 컴포넌트 내부에서 useForm 을 독립적으로 사용하기
+
+export interface SignupForm {
+    email: string;
+    username: string; // 아이디
+    nickname: string;
+    password?: string; // 단계별로 입력받으므로 선택적으로 표시
+    passwordConfirm?: string;
+}
+
 export default function Signup() {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({ email: "", password: "", nickname: "" });
@@ -31,7 +42,9 @@ export default function Signup() {
             <div className="text-center my-4 text-gray-500">OR</div>
             {step === 1 && (
                 <SignupStep1 
-                    initialEmail={formData.email} 
+                    defaultValues={{
+                        email: formData.email
+                    }} 
                     onNext={nextStep} 
                 />
             )}
