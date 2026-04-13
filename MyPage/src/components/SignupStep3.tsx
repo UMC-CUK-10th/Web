@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import type { SignupForm } from "../pages/Signup";
 
 interface SignupStep3Props {
-    onNext: (data: { nickname: string }) => void;
+    onNext: (data: { name: string }) => void;
     onPrev: () => void;
 }
 
@@ -17,7 +17,7 @@ export default function SignupStep3({ onNext, onPrev }: SignupStep3Props) {
 
     const onSubmit = (data: SignupForm) => {
         onNext({
-            nickname: data.nickname.trim()
+            name: data.name.trim()
         });
     }
 
@@ -28,7 +28,7 @@ export default function SignupStep3({ onNext, onPrev }: SignupStep3Props) {
                     사용하실 닉네임을 입력해주세요
                 </label>
                 <input
-                    {...register("nickname", {
+                    {...register("name", {
                         required: "닉네임은 필수입니다.",
                         minLength: {
                             value: 2,
@@ -42,14 +42,11 @@ export default function SignupStep3({ onNext, onPrev }: SignupStep3Props) {
                     })}
                     type="text"
                     placeholder="닉네임 (2~10자)"
-                    className={`border p-3 rounded-xl outline-none focus:ring-2 transition-all ${errors.nickname ? "border-red-500 ring-red-100" : "border-gray-300 focus:ring-blue-100"
+                    className={`border p-3 rounded-xl outline-none focus:ring-2 transition-all ${errors.name ? "border-red-500 ring-red-100" : "border-gray-300 focus:ring-blue-100"
                         }`}
-                    // value={nickname}
-                    // onChange={handleChange}
-                    // required
                     autoFocus
                 />
-                {errors.nickname && <p className="text-red-500 text-xs mt-1 px-1">⚠️ {errors.nickname.message}</p>}
+                {errors.name && <p className="text-red-500 text-xs mt-1 px-1">⚠️ {errors.name.message}</p>}
             </div>
 
             <div className="flex gap-2 mt-4">

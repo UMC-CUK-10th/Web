@@ -1,4 +1,7 @@
 import {useForm} from "react-hook-form";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 interface LoginForm {
     email: string;
@@ -6,6 +9,9 @@ interface LoginForm {
 }
 
 export default function Login() {
+    const navigate = useNavigate();
+    const { setUser } = useUser();
+    
     // useForm 을 이용하자
     const {
         register,
@@ -17,9 +23,44 @@ export default function Login() {
 
 
     // 제출 핸들러
-    const onSubmit = () => {
-        alert("로그인 성공");
+    const onSubmit = async (data: LoginForm) => {
+        const url = "http://localhost:8000/v1/auth/signin";
+        try {
+            const response = await axios.post(url, data, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.status === 200 || response.status === 201) {
+                const userData = response.data.data;
+                const token = userData.accessToken;
+                
+                if (token) {
+                    localStorage.setItem("accessToken", token);
+                    console.log(`${token}`);
+                } else {
+                    console.log("토큰이 없습니다");
+                }
+
+                setUser(userData);
+
+                alert(`${userData.name}님, 반갑습니다!`);
+                
+                // 메인 페이지로 이동
+                navigate("/");
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const message = error.response?.data?.message || "로그인에 실패했습니다.";
+                alert(`에러: ${message}`);
+            } else {
+                console.error("Unknown Error:", error);
+            }
+        }
     }
+
     return (
         <div className="p-8 max-w-md mx-auto">
             <h1 className="text-3xl font-bold mb-6">로그인</h1>

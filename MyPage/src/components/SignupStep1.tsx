@@ -19,32 +19,6 @@ export default function SignupStep1({ defaultValues, onNext }: SignupStep1Props)
         defaultValues
     })
 
-    // const [email, setEmail] = useState(defaultValues);
-    // const [errors, setErrors] = useState({ email: "" });
-
-    // const isEmpty = email.trim() === "";
-
-    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const { value } = e.target;
-    //     setEmail(value);
-    //     if (errors.email) setErrors({ email: "" });
-    // };
-
-    // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    //     e.preventDefault();
-    //     const form = e.currentTarget;
-
-    //     if (!form.checkValidity()) {
-    //         // 상세 에러 메시지 추출 로직
-    //         const input = form.elements.namedItem("email") as HTMLInputElement;
-    //         setErrors({ email: input.validationMessage });
-    //         return;
-    //     }
-
-    //     // ✅ 유효성 검사 통과 시 부모의 함수 실행
-    //     onNext({ email });
-    // };
-
     return (
         <form onSubmit={handleSubmit(onNext)} noValidate className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
