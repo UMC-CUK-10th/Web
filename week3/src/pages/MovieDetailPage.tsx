@@ -1,76 +1,52 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import type { Movie, MovieCreditResponse } from "../types/movie";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useCustomFetch } from "../hooks/useCustomFetch";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 const MovieDetailPage = () => {
   const { id } = useParams();
-  const [movie, setMovie] = useState<Movie | null>(null);
-  const [credits, setCredits] = useState<MovieCreditResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMovieDetails = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
+    }),
+    []
+  );
 
-        // Fetch movie details
-        const movieResponse = await fetch(
-          `${BASE_URL}/movie/${id}?language=ko-KR`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
-            },
-          }
-        );
-        
-        if (!movieResponse.ok) {
-          console.error('Movie API Error:', await movieResponse.text());
-          throw new Error("영화 정보를 불러오는데 실패했습니다.");
-        }
-        
-        const movieData = await movieResponse.json();
+  const {
+    data: movie,
+    isLoading: isMovieLoading,
+    error: movieError,
+  } = useCustomFetch<Movie>(id ? `${BASE_URL}/movie/${id}` : null, {
+    params: { language: "ko-KR" },
+    headers,
+    errorMessage: "영화 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+  });
 
-        // Fetch credits
-        const creditsResponse = await fetch(
-          `${BASE_URL}/movie/${id}/credits?language=ko-KR`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
-            },
-          }
-        );
-        
-        if (!creditsResponse.ok) {
-          console.error('Credits API Error:', await creditsResponse.text());
-          throw new Error("출연진 정보를 불러오는데 실패했습니다.");
-        }
-        
-        const creditsData = await creditsResponse.json();
-
-        setMovie(movieData);
-        setCredits(creditsData);
-      } catch (err) {
-        console.error('Fetch Error:', err);
-        setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchMovieDetails();
+  const {
+    data: credits,
+    isLoading: isCreditsLoading,
+    error: creditsError,
+  } = useCustomFetch<MovieCreditResponse>(
+    id ? `${BASE_URL}/movie/${id}/credits` : null,
+    {
+      params: { language: "ko-KR" },
+      headers,
+      errorMessage: "출연진 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
     }
-  }, [id]);
+  );
+
+  const isLoading = isMovieLoading || isCreditsLoading;
+  const error = movieError ?? creditsError;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        <LoadingSpinner />
       </div>
     );
   }
