@@ -1,3 +1,5 @@
+import ToggleBar from "../components/ToggleBar";
+
 export default function Home() {
     const items = ["🐹", "🌻", "🐹", "🍌", "🐹", "🍎", "🐹", "🌼"];
 
