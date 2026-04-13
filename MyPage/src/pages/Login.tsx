@@ -36,7 +36,7 @@ export default function Login() {
             if (response.status === 200 || response.status === 201) {
                 const userData = response.data.data;
                 const token = userData.accessToken;
-                
+                console.log(userData);
                 if (token) {
                     localStorage.setItem("accessToken", token);
                     console.log(`${token}`);
