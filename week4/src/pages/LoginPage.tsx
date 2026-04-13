@@ -1,4 +1,7 @@
+import { postSignin } from "../apis/auth.ts";
+import { LOCAL_STORAGE_KEY } from "../constants/key.ts";
 import useForm from "../hooks/useForm";
+import { useLocalStorage } from "../hooks/useLocalStorage.ts";
 import { type UserSigninInformatin, validateSignin } from "../utils/validate";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
@@ -6,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { setItem } = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
 
   const { values, error, touched, getInputProps } =
     useForm<UserSigninInformatin>({
@@ -18,10 +22,17 @@ const LoginPage = () => {
     values.email === "" ||
     values.password === "";
 
-  const handleSubmit = () => {
-  if (isDisabled) return;
-  alert("로그인에 성공하였습니다.");
-  navigate("/");
+  const handleSubmit = async () => {
+    if (isDisabled) return;
+
+    try {
+      const response = await postSignin(values);
+      setItem(response.data.accessToken);
+      alert("로그인에 성공하였습니다.");
+      navigate("/");
+    } catch (error: any) {
+      alert(`로그인에 실패했습니다: ${error?.message ?? "다시 시도해주세요."}`);
+    }
   };
 
   return (
@@ -68,7 +79,10 @@ const LoginPage = () => {
             </p>
           </div>
 
-          <button className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+          <button
+            type="button"
+            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
             <FcGoogle size={20} />
             구글 로그인
           </button>
@@ -125,6 +139,16 @@ const LoginPage = () => {
           >
             로그인
           </button>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            아직 회원이 아니신가요?{" "}
+            <span
+              className="cursor-pointer font-semibold text-pink-500 hover:underline"
+              onClick={() => navigate("/signup")}
+            >
+              회원가입
+            </span>
+          </p>
         </section>
       </main>
     </div>

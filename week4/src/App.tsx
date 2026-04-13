@@ -5,6 +5,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import LoginPage from "./pages/LoginPage.tsx";
 import HomeLayout from "./layout/HomeLayout.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
+import MyPage from "./pages/MyPage.tsx";
 
 
 const router = createBrowserRouter([
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
+      { path: "my", element: <MyPage /> },
     ],
   },
 ]);;
