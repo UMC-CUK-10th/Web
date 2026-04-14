@@ -2,6 +2,8 @@ import {useForm} from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import Cookies from "js-cookie"
+import API from "../lib/axios";
 
 interface LoginForm {
     email: string;
@@ -24,40 +26,17 @@ export default function Login() {
 
     // 제출 핸들러
     const onSubmit = async (data: LoginForm) => {
-        const url = "http://localhost:8000/v1/auth/signin";
         try {
-            const response = await axios.post(url, data, {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            const res = await API.post("/auth/signin", data);
 
-            if (response.status === 200 || response.status === 201) {
-                const userData = response.data.data;
-                const token = userData.accessToken;
-                console.log(userData);
-                if (token) {
-                    localStorage.setItem("accessToken", token);
-                    console.log(`${token}`);
-                } else {
-                    console.log("토큰이 없습니다");
-                }
-
+            if (res.status === 200 || res.status === 201) {
+                const userData = res.data.data;
+                localStorage.setItem("accessToken", userData.accessToken);
                 setUser(userData);
-
-                alert(`${userData.name}님, 반갑습니다!`);
-                
-                // 메인 페이지로 이동
                 navigate("/");
             }
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                const message = error.response?.data?.message || "로그인에 실패했습니다.";
-                alert(`에러: ${message}`);
-            } else {
-                console.error("Unknown Error:", error);
-            }
+            alert(`로그인 실패: ${error})`);
         }
     }
 
