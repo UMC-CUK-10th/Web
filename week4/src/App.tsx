@@ -12,6 +12,7 @@ import SignupPage from "./pages/SignupPage";
 import MyPage from "./pages/MyPage";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedLayout from "./layout/ProtectedLayout";
+import GooglePage from "./pages/GooglePage";
 
 
 const publicRoutes: RouteObject[] = [
@@ -23,6 +24,7 @@ const publicRoutes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
+      { path: "v1/auth/google/callback", element: <GooglePage /> },
     ],
   },
 ];
