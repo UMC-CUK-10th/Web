@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import type { SignupForm } from "../pages/Signup";
+import type { SignupForm } from "../types/SignupForm";
 
 // 비밀번호와 비밀번호 확인값이 일치하는지? -> validate 옵션으로 처리하기
 

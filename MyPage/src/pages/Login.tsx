@@ -1,9 +1,8 @@
 import {useForm} from "react-hook-form";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import Cookies from "js-cookie"
 import API from "../lib/axios";
+import GoogleLoginBtn from "../components/GoogleLoginBtn";
 
 interface LoginForm {
     email: string;
@@ -44,8 +43,7 @@ export default function Login() {
         <div className="p-8 max-w-md mx-auto">
             <h1 className="text-3xl font-bold mb-6">로그인</h1>
 
-            {/* 구글 로그인 버튼 (컴포넌트가 있다고 가정) */}
-            <button className="w-full border p-2 rounded mb-4">Google로 시작하기</button>
+            <GoogleLoginBtn/>
 
             <div className="text-center my-4 text-gray-500">OR</div>
 

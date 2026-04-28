@@ -23,7 +23,7 @@ export default function Navbar() {
     <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 shadow-sm">
       {/* 로고 영역 */}
       <div className="text-2xl font-bold text-blue-600">
-        <Link to="/">🐹</Link>
+        <Link to="/">김햄찌입니다</Link>
       </div>
 
       {/* 메뉴 링크 영역 */}

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import API from "../lib/axios";
+import type { SignupForm } from "../types/SignupForm";
 
 export const useSignup = () => {
     const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<SignupForm>({
         email: "",
         password: "",
+        passwordConfirm: "",
         name: ""
     });
 

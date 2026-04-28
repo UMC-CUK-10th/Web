@@ -19,17 +19,28 @@ export const useAxiosInterceptor = () => {
                     originalReq._retry = true;
 
                     try {
-                        // 재발급 요청
-                        const res = await axios.post("http://localhost:8000/v1/auth/refresh", {}, { withCredentials: true });
+                        // 1. 로컬 스토리지에서 리프레시 토큰 꺼내기
+                        const rt = localStorage.getItem("refreshToken");
 
-                        const newAT = res.data.data.accessToken;
+                        if (!rt) throw new Error("NO REFRESH TOKEN");
+
+                        // 2. 바디에 담아서 재발급 요청
+                        const res = await axios.post("http://localhost:8000/v1/auth/refresh", {
+                            refreshToken: rt // 백엔드 DTO 필드명 확인
+                        });
+
+                        // 3. 새로운 토큰 저장
+                        const { accessToken: newAT, refreshToken: newRT } = res.data.data;
                         localStorage.setItem("accessToken", newAT);
+                        localStorage.setItem("refreshToken", newAT);
 
+                        // 4. 기존 요청 재시도
                         originalReq.headers.Authorization = `Bearer ${newAT}`;
                         return API(originalReq);
                     } catch (refreshError) {
                         // 리프레시 토큰도 만료
                         localStorage.removeItem("accessToken");
+                        localStorage.removeItem("refreshToken");
                         setUser(null);
                         navigate("/login")
                         return Promise.reject(refreshError);

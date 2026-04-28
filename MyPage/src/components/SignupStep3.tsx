@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import type { SignupForm } from "../pages/Signup";
+import type { SignupForm } from "../types/SignupForm";
 
 interface SignupStep3Props {
     onNext: (data: { name: string }) => void;
