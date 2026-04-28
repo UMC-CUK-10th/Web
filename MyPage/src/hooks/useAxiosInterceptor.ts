@@ -29,7 +29,7 @@ export const useAxiosInterceptor = () => {
                             refreshToken: rt // 백엔드 DTO 필드명 확인
                         });
 
-                        // 3. 새로운 토큰 저장
+                        // 3. 새로운 토큰 저장.
                         const { accessToken: newAT, refreshToken: newRT } = res.data.data;
                         localStorage.setItem("accessToken", newAT);
                         localStorage.setItem("refreshToken", newAT);
