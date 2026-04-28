@@ -12,14 +12,14 @@ import { postLogout, postSignin } from "../apis/auth";
 interface AuthContextType {
   accessToken: string | null;
   refreshToken: string | null;
-  login: (signInData: RequestSigninDto) => Promise<void>;
+  login: (signInData: RequestSigninDto) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   accessToken: null,
   refreshToken: null,
-  login: async () => {},
+  login: async () => false,
   logout: async () => {},
 });
 
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     getRefreshTokenFromStorage()
   );
 
-  const login = async (signInData: RequestSigninDto) => {
+  const login = async (signInData: RequestSigninDto): Promise<boolean> => {
     try {
       const response = await postSignin(signInData);
 
@@ -58,26 +58,27 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setAccessToken(newAccessToken);
         setRefreshToken(newRefreshToken);
 
-        alert("로그인 성공");
-        window.location.href = "/my";
+        return true;
       }
+
+      return false;
     } catch (error) {
       console.error("로그인 오류", error);
-      alert("로그인 실패");
+      return false;
     }
   };
 
   const logout = async () => {
     try {
       await postLogout();
+
       removeAccessTokenFromStorage();
       removeRefreshTokenFromStorage();
 
       setAccessToken(null);
       setRefreshToken(null);
 
-      alert("로그아웃됨");
-      window.location.href = "/login";
+      alert("로그아웃되었습니다.");
     } catch (error) {
       console.error("로그아웃 오류", error);
       alert("로그아웃 실패");
@@ -92,6 +93,5 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  return context;
+  return useContext(AuthContext);
 };
