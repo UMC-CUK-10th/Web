@@ -1,3 +1,4 @@
+// types/auth.ts
 import type { CommonResponse } from "./common.ts";
 
 
