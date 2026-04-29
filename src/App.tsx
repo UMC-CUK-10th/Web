@@ -1,36 +1,49 @@
-import './App.css';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import './App.css'
+import {createBrowserRouter, RouterProvider, type RouteObject} from "react-router-dom"
+import NotFoundPage from './pages/NotFoundPage'
+import LoginPage from './pages/LoginPage';
+import HomeLayout from './layouts/HomeLayout';
+import HomePage from './pages/HomePage';
+import SignupPage from './pages/SignupPage';
+import MyPage from './pages/MyPage';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedLayout } from './layouts/ProtectedLayout';
 
-import HomePage from './pages/home';
-import NotFound from './pages/not-found';
-import HelloPage from './pages/hello';
-import ByePage from './pages/bye';
-import RootLayout from './layout/root-layout';
-
-const router = createBrowserRouter([
+const publicRoutes:RouteObject[] = [
   {
-    path: '/',
-    element: <RootLayout />,
-    errorElement: <NotFound />,
+    path:"/",
+    element: <HomeLayout />,
+    errorElement:<NotFoundPage/>,
     children: [
+      {index: true, element:<HomePage/>},
+      {path: 'login', element:<LoginPage/> },
+      {path: 'signup', element:<SignupPage/>},
+    ],
+  },
+];
+
+const protectedRoutes: RouteObject[] = [
+  {
+    path:"/",
+    element: <ProtectedLayout/>,
+    errorElement: <NotFoundPage/>,
+    children:[
       {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: 'hello',
-        element: <HelloPage />, 
-      },
-      {
-        path: 'bye',
-        element: <ByePage />,
+        path:"my",
+        element:<MyPage/>,
       },
     ],
   },
-]);
+];
+
+const router = createBrowserRouter([...publicRoutes,...protectedRoutes]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router}/>
+    </AuthProvider>
+  )
 }
 
 export default App;
