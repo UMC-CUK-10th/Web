@@ -12,7 +12,7 @@ const LoginPage = () => {
     });
 
   const handleSubmit = () => {
-    console.log(values);
+    console.log(values); // 콘솔 로그로 확인
   };
 
   // 오류가 하나라도 있거나, 입력값이 비어있으면 버튼을 비활성화
