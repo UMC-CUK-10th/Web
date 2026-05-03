@@ -1,7 +1,7 @@
 import type { CommonResponse } from "./common";
 
 export type RequestSignupDto = {
-  name: string;
+  name?: string;
   email: string;
   bio?: string;
   avatar?: string;
