@@ -1,3 +1,4 @@
+// apis/auth.ts
 import type {
   RequestSigninDto,
   RequestSignupDto,
@@ -18,6 +19,11 @@ export const postSignin = async (
   body: RequestSigninDto
 ): Promise<ResponseSigninDto> => {
   const { data } = await axiosInstance.post("/v1/auth/signin", body);
+  return data;
+};
+
+export const postLogout = async () => {
+  const { data } = await axiosInstance.post("/v1/auth/logout");
   return data;
 };
 

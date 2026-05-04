@@ -10,12 +10,10 @@ axiosInstance.interceptors.request.use(
     const accessToken = localStorage.getItem(LOCAL_STORAGE_KEY.accessToken);
 
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers.Authorization = `Bearer ${JSON.parse(accessToken)}`;
     }
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
