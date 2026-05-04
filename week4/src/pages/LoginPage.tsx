@@ -29,7 +29,7 @@ const LoginPage = () => {
       const response = await postSignin(values);
       setItem(response.data.accessToken);
       alert("로그인에 성공하였습니다.");
-      navigate("/");
+      navigate("/my");
     } catch (error: any) {
       alert(`로그인에 실패했습니다: ${error?.message ?? "다시 시도해주세요."}`);
     }
