@@ -35,6 +35,11 @@ const LoginPage = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href =
+      `${import.meta.env.VITE_SERVER_API_URL}/v1/auth/google/login`;
+  };
+
   return (
     <div className="min-h-screen bg-[#fafafa] text-gray-800">
       <nav className="fixed top-0 left-0 z-20 w-full border-b border-gray-200 bg-white">
@@ -81,6 +86,7 @@ const LoginPage = () => {
 
           <button
             type="button"
+            onClick={handleGoogleLogin}
             className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
           >
             <FcGoogle size={20} />
