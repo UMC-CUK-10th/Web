@@ -1,67 +1,48 @@
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import MovieDetail from "../components/MovieDetail";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useCustomFetch } from "../hooks/useCustomFetch";
 import type { MovieDetailInfo, MovieCreditsResponse } from "../types/movie";
 
 const MovieDetailPage = () => {
   const { movieId } = useParams<{ movieId: string }>();
-  const [detail, setDetail] = useState<MovieDetailInfo | null>(null);
-  const [credits, setCredits] = useState<MovieCreditsResponse | null>(null);
-  const [isPending, setIsPending] = useState(false);
-  const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    if (!movieId) return;
+  const detailUrl = movieId
+    ? `https://api.themoviedb.org/3/movie/${movieId}?language=ko-KR`
+    : null;
 
-    const fetchDetail = async () => {
-      setIsPending(true);
-      setIsError(false);
+  const creditsUrl = movieId
+    ? `https://api.themoviedb.org/3/movie/${movieId}/credits?language=ko-KR`
+    : null;
 
-      try {
-        const detailResponse = await axios.get<MovieDetailInfo>(
-          `https://api.themoviedb.org/3/movie/${movieId}?language=ko-KR`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
-            },
-          }
-        );
+  const {
+    data: detail,
+    isPending: isDetailPending,
+    isError: isDetailError,
+  } = useCustomFetch<MovieDetailInfo>(detailUrl);
 
-        const creditsResponse = await axios.get<MovieCreditsResponse>(
-          `https://api.themoviedb.org/3/movie/${movieId}/credits?language=ko-KR`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
-            },
-          }
-        );
+  const {
+    data: credits,
+    isPending: isCreditsPending,
+    isError: isCreditsError,
+  } = useCustomFetch<MovieCreditsResponse>(creditsUrl);
 
-        setDetail(detailResponse.data);
-        setCredits(creditsResponse.data);
-      } catch (error) {
-        console.error(error);
-        setIsError(true);
-      } finally {
-        setIsPending(false);
-      }
-    };
-
-    fetchDetail();
-  }, [movieId]);
+  const isPending = isDetailPending || isCreditsPending;
+  const isError = isDetailError || isCreditsError;
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] p-10">
-        <span className="text-red-500 text-2xl">영화 정보를 불러오는 중 오류가 발생했습니다.</span>
+      <div className="flex min-h-[60vh] items-center justify-center p-10">
+        <span className="text-2xl text-red-500">
+          영화 정보를 불러오는 중 오류가 발생했습니다.
+        </span>
       </div>
     );
   }
 
   if (isPending || !detail || !credits) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -71,4 +52,3 @@ const MovieDetailPage = () => {
 };
 
 export default MovieDetailPage;
-

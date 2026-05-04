@@ -1,4 +1,5 @@
 import type { MovieCreditsResponse, MovieDetailInfo } from '../types/movie';
+import { PersonCard } from './PersonCard';
 
 interface MovieDetailProps {
   detail: MovieDetailInfo;
@@ -46,40 +47,20 @@ const MovieDetail = ({ detail, credits }: MovieDetailProps) => {
 
       <div className="mt-8 grid grid-cols-5 gap-x-6 gap-y-10 md:grid-cols-7 lg:grid-cols-10">
         {director && (
-          <div className="text-center">
-            {director.profile_path ? (
-              <img
-                src={`https://image.tmdb.org/t/p/w185${director.profile_path}`}
-                alt={director.name}
-                className="mx-auto h-24 w-24 rounded-full border-2 border-white object-cover"
-              />
-            ) : (
-              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-2 border-white bg-zinc-800 text-xs">
-                No img
-              </div>
-            )}
-            <p className="mt-3 text-sm font-bold">{director.name}</p>
-            <p className="text-xs text-zinc-300">Director</p>
-          </div>
+          <PersonCard
+            name={director.name}
+            role="Director"
+            profilePath={director.profile_path}
+          />
         )}
 
         {castList.map((actor) => (
-          <div key={actor.credit_id} className="text-center">
-            {actor.profile_path ? (
-              <img
-                src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
-                alt={actor.name}
-                className="mx-auto h-24 w-24 rounded-full border-2 border-white object-cover"
-              />
-            ) : (
-              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-2 border-white bg-zinc-800 text-xs">
-                No img
-              </div>
-            )}
-
-            <p className="mt-3 text-sm font-bold">{actor.name}</p>
-            <p className="text-xs text-zinc-300">{actor.character}</p>
-          </div>
+        <PersonCard
+            key={actor.credit_id}
+            name={actor.name}
+            role={actor.character}
+            profilePath={actor.profile_path}
+          />
         ))}
       </div>
     </div>
