@@ -1,0 +1,35 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.todo-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 350px;
+    text-align: center;
+}
+.todo-container__form { display: flex; gap: 10px; margin-bottom: 20px; }
+.todo-container__input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+.todo-container__button {
+    background-color: #28a745; color: white; border: none;
+    padding: 8px 12px; border-radius: 6px; cursor: pointer;
+    transition: background-color 0.3s;
+}
+.todo-container__button:hover { background-color: #218838; }
+.render-container { display: flex; justify-content: space-between; gap: 20px; }
+.render-container__list { list-style: none; text-align: left; }
+.render-container__item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px; border-bottom: 1px solid #ddd; width: 100%;
+}
+.item-button {
+    border: none; color: white; padding: 6px 10px;
+    border-radius: 6px; cursor: pointer; font-size: 12px;
+}
