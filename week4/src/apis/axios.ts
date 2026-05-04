@@ -1,113 +1,103 @@
-import axios, {
-  AxiosError,
-  type InternalAxiosRequestConfig,
-} from "axios";
+import type { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
-import type { ResponseSigninDto } from "../types/auth";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
-interface RetryableAxiosRequestConfig extends InternalAxiosRequestConfig {
+interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-const getAccessToken = () => localStorage.getItem(LOCAL_STORAGE_KEY.accessToken);
-const getRefreshToken = () => localStorage.getItem(LOCAL_STORAGE_KEY.refreshToken);
-
-const setAuthTokens = (accessToken: string, refreshToken: string) => {
-  localStorage.setItem(LOCAL_STORAGE_KEY.accessToken, accessToken);
-  localStorage.setItem(LOCAL_STORAGE_KEY.refreshToken, refreshToken);
-};
-
-const clearAuthTokens = () => {
-  localStorage.removeItem(LOCAL_STORAGE_KEY.accessToken);
-  localStorage.removeItem(LOCAL_STORAGE_KEY.refreshToken);
-};
-
-const redirectToLogin = () => {
-  if (window.location.pathname !== "/login") {
-    window.location.replace("/login");
-  }
-};
-
-export const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_API_URL,
-});
-
-axiosInstance.interceptors.request.use((config) => {
-  const accessToken = getAccessToken();
-
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  } else {
-    delete config.headers.Authorization;
-  }
-
-  return config;
-});
-
-const refreshAxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_API_URL,
-});
-
 let refreshPromise: Promise<string> | null = null;
 
-const refreshAccessToken = async (): Promise<string> => {
-  const refreshToken = getRefreshToken();
+export const axiosInstance: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_SERVER_API_URL,
+});
 
-  if (!refreshToken) {
-    throw new Error("리프레시 토큰이 없습니다.");
-  }
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const { getItem } = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
+    const accessToken = getItem();
 
-  const { data } = await refreshAxiosInstance.post<ResponseSigninDto>(
-    "/v1/auth/refresh",
-    {
-      refresh: refreshToken,
+    if (accessToken) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
-  );
 
-  const { accessToken, refreshToken: nextRefreshToken } = data.data;
-  setAuthTokens(accessToken, nextRefreshToken);
-
-  return accessToken;
-};
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as RetryableAxiosRequestConfig | undefined;
-    const status = error.response?.status;
+  async (error) => {
+    const originalRequest: CustomInternalAxiosRequestConfig = error.config;
 
-    if (!originalRequest || status !== 401) {
-      return Promise.reject(error);
-    }
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      if (originalRequest.url === `/v1/auth/refresh`) {
+        const { removeItem: removeAccessToken } = useLocalStorage(
+          LOCAL_STORAGE_KEY.accessToken
+        );
+        const { removeItem: removeRefreshToken } = useLocalStorage(
+          LOCAL_STORAGE_KEY.refreshToken
+        );
 
-    if (originalRequest.url?.includes("/v1/auth/refresh")) {
-      clearAuthTokens();
-      redirectToLogin();
-      return Promise.reject(error);
-    }
-
-    if (originalRequest._retry) {
-      return Promise.reject(error);
-    }
-
-    originalRequest._retry = true;
-
-    try {
-      if (!refreshPromise) {
-        refreshPromise = refreshAccessToken().finally(() => {
-          refreshPromise = null;
-        });
+        removeAccessToken();
+        removeRefreshToken();
+        window.location.href = "/login";
+        return Promise.reject(error);
       }
 
-      const newAccessToken = await refreshPromise;
+      originalRequest._retry = true;
 
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      if (!refreshPromise) {
+        refreshPromise = (async () => {
+          const { getItem: getRefreshToken } = useLocalStorage(
+            LOCAL_STORAGE_KEY.refreshToken
+          );
 
-      return axiosInstance(originalRequest);
-    } catch (refreshError) {
-      clearAuthTokens();
-      redirectToLogin();
-      return Promise.reject(refreshError);
+          const refreshToken = getRefreshToken();
+
+          const { data } = await axiosInstance.post(`/v1/auth/refresh`, {
+            refresh: refreshToken,
+          });
+
+          const { setItem: setAccessToken } = useLocalStorage(
+            LOCAL_STORAGE_KEY.accessToken
+          );
+          const { setItem: setRefreshToken } = useLocalStorage(
+            LOCAL_STORAGE_KEY.refreshToken
+          );
+          setAccessToken(data.data.accessToken);
+          setRefreshToken(data.data.refreshToken);
+
+          return data.data.accessToken;
+        })()
+          .catch(() => {
+            const { removeItem: removeAccessToken } = useLocalStorage(
+              LOCAL_STORAGE_KEY.accessToken
+            );
+            const { removeItem: removeRefreshToken } = useLocalStorage(
+              LOCAL_STORAGE_KEY.refreshToken
+            );
+            removeAccessToken();
+            removeRefreshToken();
+          })
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      return refreshPromise.then((newAccessToken) => {
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return axiosInstance.request(originalRequest);
+      });
     }
+
+    return Promise.reject(error);
   }
 );
