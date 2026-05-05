@@ -1,6 +1,12 @@
+import { useLocation } from "react-router-dom";
+
 export default function GoogleLoginBtn() {
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
+
     const handleGoogleLogin = () => {
-        window.location.href = "http://localhost:8000/v1/auth/google/login";
+        const googleAuthUrl = `http://localhost:8000/v1/auth/google/login?state=${encodeURIComponent(from)}`;
+        window.location.href = googleAuthUrl;
     };
 
     return (

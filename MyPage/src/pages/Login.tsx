@@ -1,5 +1,5 @@
 import {useForm} from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import API from "../lib/axios";
 import GoogleLoginBtn from "../components/GoogleLoginBtn";
@@ -11,7 +11,10 @@ interface LoginForm {
 
 export default function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { setUser } = useUser();
+
+    const from = location.state?.from?.pathname || "/";
     
     // useForm 을 이용하자
     const {
@@ -32,7 +35,7 @@ export default function Login() {
                 const userData = res.data.data;
                 localStorage.setItem("accessToken", userData.accessToken);
                 setUser(userData);
-                navigate("/");
+                navigate(from, { replace: true });
             }
         } catch (error) {
             alert(`로그인 실패: ${error})`);

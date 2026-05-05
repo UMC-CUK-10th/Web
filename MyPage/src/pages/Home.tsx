@@ -1,25 +1,44 @@
-// test
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import type { LpResponse } from "../types/LpItem";
+import LpCard from "../components/LpCard";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Home() {
-    const items = ["🐹", "🌻", "🐹", "🍌", "🐹", "🍎", "🐹", "🌼"];
+    const [sort, setSort] = useState<"asc" | "desc">("asc");
+
+    const { data: response, isLoading } = useQuery<LpResponse>({
+        queryKey: ['lps', sort],
+        queryFn: () => axios.get(`http://localhost:8000/v1/lps?order=${sort}`).then(res => res.data),
+    });
+
+    const lpList = response?.data?.data || [];
 
     return (
-        <div className="flex justify-center items-center h-screen w-full">
-            <div className="relative flex justify-center items-center w-40 h-40">
-                <h1 className="absolute text-xl font-black text-blue-600 z-10 whitespace-nowrap">
-                    김햄찌입니다
-                </h1>
-                
-                {/* 무한 회전: 타이틀에 집중하게 하는 요소*/}
-                <div className="relative w-40 h-40 animate-[spin_10s_linear_infinite]">
-                    {items.map((item, idx) => (
-                        // 8개의 아이콘이니 각각 45도씩 떨어져 위치해야함
-                        <span key={idx} className="absolute top-1/2 left-1/2 text-3xl" style={{ transform: `translate(-50%, -50%) rotate(${idx * 45}deg) translateY(-100px) rotate(-${idx * 45}deg)` }}>
-                            {item}
-                        </span>
+        <div className="p-8">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">LP 목록</h1>
+
+                <select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as "asc" | "desc")}
+                    className="border p-2 rounded-md shadow-sm cursor-pointer"
+                >
+                    <option value="asc">오래된순 (ASC)</option>
+                    <option value="desc">최신순 (DESC)</option>
+                </select>
+            </div>
+
+            {isLoading ? (
+                <LoadingSpinner/>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {lpList.map((lp) => (
+                        <LpCard lp={lp}/>
                     ))}
                 </div>
-            </div>
+            )}
         </div>
-    )
+    );
 }
