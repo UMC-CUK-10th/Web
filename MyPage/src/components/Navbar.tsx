@@ -28,6 +28,12 @@ export default function Navbar() {
 
       {/* 메뉴 링크 영역 */}
       <div className="flex gap-6 items-center">
+        <Link
+          to="/JsonPlaceholder"
+          className="text-gray-600 hover:text-green-600 font-bold transition-colors"
+        >
+          JsonPlaceholder
+        </Link>
         {user ? <span
           className="text-gray-600 hover:text-red-600 font-bold transition-colors cursor-pointer"
           onClick={() => handelLogout()}

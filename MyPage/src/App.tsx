@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Signup from "./pages/Signup";
 import GoogleCallback from "./pages/GoogleCallback";
+import JsonPlaceholder from "./pages/JsonPlaceholder";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
@@ -18,13 +19,7 @@ function AppContent() {
 
   useAxiosInterceptor();
 
-  const isLogin = () => {
-    if (user) {
-      return true
-    } else {
-      return false
-    }
-  }
+  const isLogin = !!user;
 
   const checkLoginStatus = async () => {
     const token = localStorage.getItem("accessToken");
@@ -56,9 +51,10 @@ function AppContent() {
         <Route path="/login" element={<Login />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
         <Route path="/v1/auth/google/callback" element={<GoogleCallback />} />
-        <Route element={<ProtectedRoute isLogin={isLogin()} />}>
+        <Route element={<ProtectedRoute isLogin={isLogin} />}>
           <Route path="/profile" element={<Profile />} />
         </Route>
+        <Route path="/jsonPlaceholder" element={<JsonPlaceholder />}></Route>
       </Routes>
     </>
   );
