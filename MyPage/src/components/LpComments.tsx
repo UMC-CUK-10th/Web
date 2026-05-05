@@ -90,23 +90,32 @@ export default function LpComments({ lpId, isOpen, onClose }: LpCommentsProps) {
                             ))}
                         </div>
                     ) : uniqueComments.length > 0 ? (
-                        uniqueComments.map((comment: any) => (
-                            <div key={comment.id} className="flex gap-4 border-b border-gray-50 pb-4">
-                                {/* 작성자 아바타 (예시) */}
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-blue-200 flex-shrink-0" />
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="font-bold text-sm">{comment.author?.name || "익명 사용자"}</span>
-                                        <span className="text-xs text-gray-400">
-                                            {new Date(comment.createdAt).toLocaleDateString()}
-                                        </span>
+                        <>
+                            {uniqueComments.map((comment: any) => (
+                                <div key={comment.id} className="flex gap-4 border-b border-gray-50 pb-4">
+                                    {/* 작성자 프사 */}
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 to-blue-200 flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-bold text-sm">{comment.author?.name || "익명 사용자"}</span>
+                                            <span className="text-xs text-gray-400">
+                                                {new Date(comment.createdAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-700 text-sm leading-relaxed">
+                                            {comment.content}
+                                        </p>
                                     </div>
-                                    <p className="text-gray-700 text-sm leading-relaxed">
-                                        {comment.content}
-                                    </p>
                                 </div>
-                            </div>
-                        ))
+                            ))}
+                            {isFetchingNextPage && (
+                                <div className="space-y-6">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <CommentSkeleton key={i} />
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="text-center py-20 text-gray-400">
                             첫 번째 댓글을 남겨보세요!
@@ -115,7 +124,13 @@ export default function LpComments({ lpId, isOpen, onClose }: LpCommentsProps) {
 
                     {/* 무한 스크롤 트리거 */}
                     <div ref={ref} className="h-10">
-                        {isFetchingNextPage && <div className="text-center text-xs text-gray-400">더 불러오는 중...</div>}
+                        {isFetchingNextPage && (
+                            <div className="space-y-6">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <CommentSkeleton key={i} />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
