@@ -14,7 +14,6 @@ import LpDetail from "./pages/LpDetail";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
-import FloatingButton from "./components/FloatingButton";
 
 function AppContent() {
   const { user, setUser, isInitialized, setIsInitialized } = useUser();
@@ -49,7 +48,6 @@ function AppContent() {
   return (
     <>
       <Navbar></Navbar>
-      <FloatingButton/>
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/login" element={<Login />}></Route>

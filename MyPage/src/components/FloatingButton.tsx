@@ -1,20 +1,18 @@
-import { Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
 
-export default function FloatingButton() {
+interface FloatingButtonProps {
+  onClick: () => void;
+}
 
+export default function FloatingButton({ onClick }: FloatingButtonProps) {
   return (
-    <div className="fixed bottom-8 right-8 flex flex-col-reverse items-center gap-4 z-[9999]">
-      <Link
-        to="/JsonPlaceholder"
-        className={
-          `w-14 h-14 rounded-full shadow-lg 
-          flex items-center justify-center transition-all duration-300 active:scale-90 
-          ${"bg-blue-600 hover:bg-blue-700"} text-white`
-        }
-      >
-        <Plus size={32} />
-      </Link>
-    </div>
+    <button
+      onClick={onClick}
+      className="fixed bottom-8 right-8 w-16 h-16 rounded-full shadow-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all active:scale-95 z-[999]"
+    >
+      <div className="relative">
+        <MessageCircle size={32} />
+      </div>
+    </button>
   );
 }

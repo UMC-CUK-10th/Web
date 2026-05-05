@@ -1,12 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import axios from "axios";
 import { Heart, Edit3, Trash2, Calendar, ChevronLeft } from "lucide-react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorFallback from "../components/ErrorFallback";
+import FloatingButton from "../components/FloatingButton";
+import LpComments from "../components/LpComments";
 
 export default function LpDetail() {
   const { id } = useParams<{ id: string }>();
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+
   const navigate = useNavigate();
 
   const { data: lp, isLoading, isError } = useQuery({
@@ -81,6 +86,19 @@ export default function LpDetail() {
           {lp.content || "상세 설명이 등록되지 않았습니다."}
         </div>
       </div>
+      { id && (
+        <FloatingButton 
+          onClick={() => setIsCommentOpen(true)} 
+        />
+      )}
+
+      {id && (
+        <LpComments 
+          lpId={id} 
+          isOpen={isCommentOpen} 
+          onClose={() => setIsCommentOpen(false)} 
+        />
+      )}
     </div>
   );
 }

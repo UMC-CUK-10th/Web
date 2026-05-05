@@ -1,19 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import type { LpResponse } from "../types/LpItem";
-import LpCard from "../components/LpCard";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LpList from "../components/LpList";
 
 export default function Home() {
     const [sort, setSort] = useState<"asc" | "desc">("asc");
-
-    const { data: response, isLoading } = useQuery<LpResponse>({
-        queryKey: ['lps', sort],
-        queryFn: () => axios.get(`http://localhost:8000/v1/lps?order=${sort}`).then(res => res.data),
-    });
-
-    const lpList = response?.data?.data || [];
 
     return (
         <div className="p-8">
@@ -30,15 +19,7 @@ export default function Home() {
                 </select>
             </div>
 
-            {isLoading ? (
-                <LoadingSpinner/>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {lpList.map((lp) => (
-                        <LpCard lp={lp}/>
-                    ))}
-                </div>
-            )}
+            <LpList sort={sort}/>
         </div>
     );
 }
