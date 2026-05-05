@@ -13,7 +13,8 @@ import MyPage from "./pages/MyPage";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedLayout from "./layout/ProtectedLayout";
 import GooglePage from "./pages/GooglePage";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -45,11 +46,16 @@ const protectedRoutes: RouteObject[] = [
 
 const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
+export const queryClient = new QueryClient();
+
 function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   );
 }
 
