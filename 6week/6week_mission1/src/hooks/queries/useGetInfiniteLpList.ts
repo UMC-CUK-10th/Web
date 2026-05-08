@@ -18,4 +18,5 @@ function useGetInfiniteList(
   });
 }
 
+
 export default useGetInfiniteList;

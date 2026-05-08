@@ -6,7 +6,6 @@ const LpDetailPage = () => {
   const { lpid } = useParams<{ lpid: string }>();
   const navigate = useNavigate();
 
-  // [조건 1] queryKey: ['lp', lpid] 적용
   const { data: lp, isLoading, isError, refetch } = useQuery({
     queryKey: ["lp", lpid],
     queryFn: async () => {
@@ -22,7 +21,6 @@ const LpDetailPage = () => {
     enabled: !!lpid,
   });
 
-  // [조건 3] 삭제 로직
   const deleteMutation = useMutation({
     mutationFn: async () => {
       let token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
@@ -51,13 +49,11 @@ const LpDetailPage = () => {
 
   return (
     <main className="max-w-5xl mx-auto p-6 md:p-12">
-      {/* 회전 애니메이션 정의 */}
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-lp-spin { animation: spin 8s linear infinite; }
       `}</style>
 
-      {/* 상단바 */}
       <div className="flex justify-between items-center mb-10">
         <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-black font-medium">← Back</button>
         <div className="flex gap-2">
@@ -67,10 +63,8 @@ const LpDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* [조건 2] LP판 섹션: 동그라미 + 회전 + 가운데 구멍 */}
         <div className="flex justify-center">
           <div className="relative group animate-lp-spin">
-            {/* 메인 LP판 이미지 */}
             <div className="w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl border-[12px] border-white ring-1 ring-black/5">
               {lp.thumbnail ? (
                 <img src={lp.thumbnail} alt={lp.title} className="w-full h-full object-cover" />
@@ -79,12 +73,10 @@ const LpDetailPage = () => {
               )}
             </div>
             
-            {/* ✨ 가운데 구멍 (배경색과 맞춰서 뚫린 효과) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-gray-50 rounded-full border border-black/10 shadow-inner"></div>
           </div>
         </div>
 
-        {/* [조건 2] 정보 섹션 */}
         <div className="flex flex-col gap-6">
           <header>
             <div className="flex gap-2 mb-3">
@@ -96,7 +88,6 @@ const LpDetailPage = () => {
             <div className="flex items-center gap-3 text-gray-400 text-sm">
               <span>{formattedDate}</span>
               <span className="w-1.5 h-1.5 bg-gray-200 rounded-full"></span>
-              {/* [조건 3] 좋아요 버튼 UI */}
               <button className="flex items-center gap-1.5 hover:scale-110 transition-transform">
                 <span className="text-lg">❤️</span>
                 <span className="text-gray-700 font-bold">{lp.likes?.length || 0}</span>

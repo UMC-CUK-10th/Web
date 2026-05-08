@@ -17,5 +17,4 @@ function useGetLpList({cursor, search, order, limit}:PaginationDto){
   });
 }
 
-
 export default useGetLpList;

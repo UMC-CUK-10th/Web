@@ -26,13 +26,11 @@ const LoginPage = () => {
     await login(values);
   };
 
-  // 💡 [수정 포인트] 여기에 닫는 괄호( }; )가 빠져있어서 아래 코드까지 묶여있었습니다.
   const handleGoogleLogin = () => {
     window.location.href = 
       import.meta.env.VITE_API_BASE_URL + "/v1/auth/google/login";
-  }; // 👈 닫는 괄호 추가!
+  };
 
-  // 오류가 하나라도 있거나 입력값이 비어있으면 버튼을 비활성화
   const isDisabled =
     Object.values(errors || {}).some((error) => error.length > 0) ||
     Object.values(values).some((value) => value === "");

@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, useEffect } from "react";
+import { useState, type ChangeEvent } from "react";
 
 interface UseFormProps<T> {
   initialValue: T;

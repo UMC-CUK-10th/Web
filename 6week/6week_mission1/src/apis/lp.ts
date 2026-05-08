@@ -8,4 +8,4 @@ export const getLpList = async(paginationDto: PaginationDto,) : Promise<Response
   });
 
   return data;
-};
+}; 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "./Sidebar";
 
+
 const Navbar = () => {
   const { accessToken, user, logout } = useAuth();
   

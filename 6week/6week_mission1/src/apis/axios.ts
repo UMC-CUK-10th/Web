@@ -6,14 +6,12 @@ interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-// 전역변수로 refresh 요청의 promise를 저장해서 중복 요청을 방지한다.
 let refreshPromise: Promise<string> | null = null;
 
 export const axiosInstance = axios.create({
   baseURL: "http://localhost:8000",
 });
 
-// 요청 인터셉터
 axiosInstance.interceptors.request.use(
   (config) => {
     const { getItem } = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
@@ -77,7 +75,6 @@ axiosInstance.interceptors.response.use(
           return data.data.accessToken;
         })();
 
-        // refreshPromise의 후속 처리
         refreshPromise
           .catch((error) => {
             const { removeItem: removeAccessToken } = useLocalStorage(
@@ -95,7 +92,6 @@ axiosInstance.interceptors.response.use(
           });
       }
 
-      // refreshPromise가 있을 때 처리
       return refreshPromise.then((newAccessToken) => {
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
         return axiosInstance.request(originalRequest);
