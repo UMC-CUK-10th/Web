@@ -6,8 +6,8 @@ interface LpCardSkeletonListProps {
 const LpCardSkeletonList = ({ count }: LpCardSkeletonListProps) => {
   return (
     <>
-      {new Array(count).fill(0).map((idx) => (
-        <LpCardSkeleton key={idx} />
+      {Array.from({ length: count }, (_, index) => (
+        <LpCardSkeleton key={index} />
       ))}
     </>
   );
