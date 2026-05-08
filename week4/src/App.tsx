@@ -13,6 +13,8 @@ import MyPage from "./pages/MyPage";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedLayout from "./layout/ProtectedLayout";
 import GooglePage from "./pages/GooglePage";
+import LpDetailPage from "./pages/LpDetailPage";
+import CommentPage from "./pages/CommentPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -20,12 +22,23 @@ const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <HomeLayout />,
-    errorElement: <NotFound/>,
+    errorElement: <NotFound />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "v1/auth/google/callback", element: <GooglePage /> },
+
+      {
+        path: "lp/:lpid",
+        element: <LpDetailPage />,
+        children: [
+          {
+            path: "comments",
+            element: <CommentPage />,
+          },
+        ],
+      },
     ],
   },
 ];

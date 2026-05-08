@@ -1,21 +1,39 @@
-import { useState } from "react";
-import useGetLpList from "../hooks/useGetLplist";
-import Lp from "../components/Lp";
+import { useEffect, useState } from "react";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { PAGINATION_ORDER } from "../enums/common";
+import useGetInfiniteLpList from "../hooks/queries/useGetInfiniteLpList";
+import { useInView } from "react-intersection-observer";
+import LpCard from "../components/LpCard/LpCard";
+import LpCardSkeletonList from "../components/LpCard/LpCardSkeletonList";
 
 function HomePage() {
   const [search, setSearch] = useState("");
-  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [order, setOrder] = useState<PAGINATION_ORDER>(PAGINATION_ORDER.desc);
 
-  const { data, isPending, isError } = useGetLpList({
-    search,
-    order,
-    sort: "createdAt",
+  const {
+    data: lps,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    isPending,
+    fetchNextPage,
+    isError,
+  } = useGetInfiniteLpList(10, search, order);
+
+  const { ref, inView } = useInView({
+    threshold: 0,
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetching, fetchNextPage]);
 
   if (isPending) {
     return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#fafafa] text-xl font-medium text-gray-500">
-        Loading...
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#fafafa]">
+        <LoadingSpinner />
       </div>
     );
   }
@@ -23,10 +41,12 @@ function HomePage() {
   if (isError) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#fafafa] text-xl font-medium text-red-500">
-        Error.
+        목록을 불러올 수 없습니다.
       </div>
     );
   }
+
+  const lpList = lps?.pages.map((page) => page.data.data).flat() ?? [];
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-[#fafafa] px-6 py-8 text-gray-800">
@@ -43,11 +63,11 @@ function HomePage() {
             <button
               type="button"
               className={`h-10 rounded-xl border px-4 text-sm font-medium transition ${
-                order === "asc"
+                order === PAGINATION_ORDER.asc
                   ? "border-pink-500 bg-pink-500 text-white"
                   : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
               }`}
-              onClick={() => setOrder("asc")}
+              onClick={() => setOrder(PAGINATION_ORDER.asc)}
             >
               오래된순
             </button>
@@ -55,28 +75,32 @@ function HomePage() {
             <button
               type="button"
               className={`h-10 rounded-xl border px-4 text-sm font-medium transition ${
-                order === "desc"
+                order === PAGINATION_ORDER.desc
                   ? "border-pink-500 bg-pink-500 text-white"
                   : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
               }`}
-              onClick={() => setOrder("desc")}
+              onClick={() => setOrder(PAGINATION_ORDER.desc)}
             >
               최신순
             </button>
           </div>
         </section>
 
-        {data && data.length > 0 ? (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {data.map((lp) => (
-              <Lp key={lp.id} lp={lp} />
+        {lpList.length > 0 ? (
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {lpList.map((lp) => (
+              <LpCard key={lp.id} lp={lp} />
             ))}
+
+            {isFetchingNextPage && <LpCardSkeletonList count={10} />}
           </div>
         ) : (
           <div className="rounded-2xl border border-gray-200 bg-white py-16 text-center text-gray-500 shadow-sm">
             등록된 LP가 없습니다.
           </div>
         )}
+
+        <div ref={ref} className="h-10" />
       </div>
     </div>
   );
