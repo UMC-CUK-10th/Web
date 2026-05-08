@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
+import { isAxiosError } from "axios";
 import z from "zod";
 import { postSignup } from "../apis/auth.ts";
 import { useNavigate } from "react-router-dom";
@@ -77,9 +78,17 @@ const SignUpPage = () => {
     try {
       await postSignup(signupData);
       alert("회원가입이 완료되었습니다!");
-      navigate("/");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error(error);
+
+      if (isAxiosError(error)) {
+        const message =
+          error.response?.data?.message ?? "회원가입에 실패했습니다.";
+        alert(Array.isArray(message) ? message.join("\n") : message);
+        return;
+      }
+
       alert("회원가입에 실패했습니다.");
     }
   };

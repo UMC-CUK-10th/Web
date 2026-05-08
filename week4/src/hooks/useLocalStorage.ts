@@ -11,7 +11,15 @@ export const useLocalStorage = (key: string) => {
     try {
       const item = window.localStorage.getItem(key);
 
-      return item ? JSON.parse(item) : null;
+      if (!item) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(item);
+      } catch {
+        return item;
+      }
     } catch (error) {
       console.log(error);
     }
