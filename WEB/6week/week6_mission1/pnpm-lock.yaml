@@ -29,6 +29,9 @@ importers:
       react-hook-form:
         specifier: ^7.75.0
         version: 7.75.0(react@18.2.0)
+      react-intersection-observer:
+        specifier: ^10.0.3
+        version: 10.0.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-router-dom:
         specifier: ^7.14.2
         version: 7.14.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1035,6 +1038,15 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
+
+  react-intersection-observer@10.0.3:
+    resolution: {integrity: sha512-luICLMbs0zxTO/70Zy7K5jOXkABPEVSAF8T3FdZUlctsrIaPLmx8TZe2SSA+CY2HGWfz2INyNTnp82pxNNsShA==}
+    peerDependencies:
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   react-router-dom@7.14.2:
     resolution: {integrity: sha512-YZcM5ES8jJSM+KrJ9BdvHHqlnGTg5tH3sC5ChFRj4inosKctdyzBDhOyyHdGk597q2OT6NTrCA1OvB/YDwfekQ==}
@@ -2103,6 +2115,12 @@ snapshots:
   react-hook-form@7.75.0(react@18.2.0):
     dependencies:
       react: 18.2.0
+
+  react-intersection-observer@10.0.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
 
   react-router-dom@7.14.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:

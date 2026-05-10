@@ -11,7 +11,6 @@ import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { postLogout, postSignin } from "../apis/auth";
 import { axiosInstance } from "../apis/axios";
 
-// 1. 타입을 업데이트하여 외부에서 토큰을 설정할 수 있게 합니다.
 interface AuthContextType {
   accessToken: string | null;
   refreshToken: string | null;
@@ -19,11 +18,16 @@ interface AuthContextType {
   isLoading: boolean;
   login: (signInData: RequestSigninDto) => Promise<void>;
   logout: () => Promise<void>;
-  setAccessToken: (token: string | null) => void; // 추가
-  setRefreshToken: (token: string | null) => void; // 추가
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  accessToken: null,
+  refreshToken: null,
+  userName: null,
+  isLoading: false,
+  login: async () => {},
+  logout: async () => {},
+});
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const {
@@ -38,11 +42,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     removeItem: removeRefreshTokenFromStorage,
   } = useLocalStorage(LOCAL_STORAGE_KEY.refreshToken);
 
-  const [accessToken, setAccessTokenState] = useState<string | null>(
+  const [accessToken, setAccessToken] = useState<string | null>(
     getAccessTokenFromStorage(),
   );
 
-  const [refreshToken, setRefreshTokenState] = useState<string | null>(
+  const [refreshToken, setRefreshToken] = useState<string | null>(
     getRefreshTokenFromStorage(),
   );
 
@@ -52,28 +56,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // 구글 로그인 등 외부에서 토큰을 설정할 때 사용할 함수들
-  const setAccessToken = (token: string | null) => {
-    if (token) {
-      setAccessTokenInStorage(token);
-      setAccessTokenState(token);
-    } else {
-      removeAccessTokenFromStorage();
-      setAccessTokenState(null);
-    }
-  };
-
-  const setRefreshToken = (token: string | null) => {
-    if (token) {
-      setRefreshTokenInStorage(token);
-      setRefreshTokenState(token);
-    } else {
-      removeRefreshTokenFromStorage();
-      setRefreshTokenState(null);
-    }
-  };
-
-  // 사용자 정보 가져오기 로직 (토큰이 생기면 자동으로 실행)
   useEffect(() => {
     const fetchAndSetUserName = async () => {
       if (accessToken && !userName) {
@@ -84,7 +66,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           setUserName(fetchedName);
           localStorage.setItem("userName", fetchedName);
         } catch (error) {
-          console.error("사용자 정보 로드 실패:", error);
+          console.error(error);
         }
       }
     };
@@ -98,12 +80,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       const { data } = await postSignin(signinData);
 
       if (data) {
-        setAccessToken(data.accessToken);
-        setRefreshToken(data.refreshToken);
-        
-        const fetchedName = data.name || "회원";
-        setUserName(fetchedName);
+        const newAccessToken = data.accessToken;
+        const newRefreshToken = data.refreshToken;
+        const fetchedName = data.name || data.name || "회원";
+
+        setAccessTokenInStorage(newAccessToken);
+        setRefreshTokenInStorage(newRefreshToken);
         localStorage.setItem("userName", fetchedName);
+
+        setAccessToken(newAccessToken);
+        setRefreshToken(newRefreshToken);
+        setUserName(fetchedName);
       }
     } finally {
       setIsLoading(false);
@@ -117,10 +104,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     } catch (error) {
       console.error(error);
     } finally {
+      removeAccessTokenFromStorage();
+      removeRefreshTokenFromStorage();
+      localStorage.removeItem("userName");
+
       setAccessToken(null);
       setRefreshToken(null);
       setUserName(null);
-      localStorage.removeItem("userName");
       setIsLoading(false);
       alert("로그아웃 되었습니다.");
     }
@@ -128,16 +118,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <AuthContext.Provider
-      value={{ 
-        accessToken, 
-        refreshToken, 
-        userName, 
-        isLoading, 
-        login, 
-        logout,
-        setAccessToken, // value에 추가
-        setRefreshToken  // value에 추가
-      }}
+      value={{ accessToken, refreshToken, userName, isLoading, login, logout }}
     >
       {children}
     </AuthContext.Provider>

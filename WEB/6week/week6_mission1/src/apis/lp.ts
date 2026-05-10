@@ -13,7 +13,7 @@ export interface Lp {
 
 export const getLpList = async (order: "asc" | "desc", cursor?: number) => {
   const { data } = await axiosInstance.get("/v1/lps", {
-    params: { cursor: cursor ?? 0, limit: 500, order },
+    params: { cursor: cursor ?? 0, limit: 30, order },
   });
   return data.data;
 };
@@ -30,5 +30,23 @@ export const likeLp = async (lpId: number) => {
 
 export const unlikeLp = async (lpId: number) => {
   const { data } = await axiosInstance.delete(`/v1/lps/${lpId}/likes`);
+  return data;
+};
+
+export const getComments = async (
+  lpId: number,
+  order: "asc" | "desc",
+  cursor?: number,
+) => {
+  const { data } = await axiosInstance.get(`/v1/lps/${lpId}/comments`, {
+    params: { cursor: cursor ?? 0, limit: 10, order },
+  });
+  return data.data;
+};
+
+export const createComment = async (lpId: number, content: string) => {
+  const { data } = await axiosInstance.post(`/v1/lps/${lpId}/comments`, {
+    content,
+  });
   return data;
 };

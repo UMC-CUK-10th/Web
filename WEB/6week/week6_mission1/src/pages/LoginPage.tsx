@@ -3,8 +3,7 @@ import { useForm } from "../hooks/useForm";
 import { validateSignin, type UserSigninInformation } from "../utils/validate";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
-// 이미지 경로가 실제 프로젝트 구조와 맞는지 꼭 확인하세요!
-import GoogleLogo from "../assets/google-logo.png"; 
+import GoogleIcon from "../icons/GoogleIcon";
 
 const LoginPage = () => {
   const { login, accessToken } = useAuth();
@@ -29,24 +28,12 @@ const LoginPage = () => {
     });
 
   const handleSubmit = async () => {
-    try {
-      await login(values);
-    } catch (error) {
-      alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
-    }
+    await login(values);
   };
 
   const handleGoogleLogin = () => {
-    // 1. .env에 등록된 서버 주소를 가져옵니다. 
-    // VITE_API_URL이 "http://localhost:3000" 형태인지 확인하세요.
-    const serverUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-    
-    // 2. 주소 끝에 /가 있는지 확인하여 안전하게 경로를 합칩니다.
-    const baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
-    
-    // 3. 백엔드의 구글 로그인 시작 주소로 리다이렉트합니다.
-    // 프로젝트 명세에 따라 /api/v1/... 처럼 /api가 붙어야 하는지도 확인해보세요!
-    window.location.href = `${baseUrl}/v1/auth/google/login`;
+    window.location.href =
+      import.meta.env.VITE_SERVER_API_URL + "/v1/auth/google/login";
   };
 
   const isDisabled =
@@ -105,7 +92,7 @@ const LoginPage = () => {
               type="button"
               onClick={handleSubmit}
               disabled={isDisabled}
-              className="mt-2 h-[44px] w-full rounded-md bg-zinc-900 text-[14px] font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-900 disabled:text-zinc-600 enabled:bg-zinc-900 enabled:text-zinc-300"
+              className="mt-2 h-[44px] w-full rounded-md bg-zinc-900 text-[14px] font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-900 disabled:text-zinc-600 enabled:bg-zinc-900 enabled:text-zinc-300 enabled:hover:bg-zinc-800"
             >
               로그인
             </button>
@@ -119,10 +106,10 @@ const LoginPage = () => {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="h-[44px] w-full rounded-md border border-white/60 bg-black text-[14px] font-medium text-white transition-colors hover:border-white active:bg-zinc-900"
+              className="h-[44px] w-full rounded-md border border-white/60 bg-black text-[14px] font-medium text-white transition-colors hover:border-white"
             >
               <span className="flex items-center justify-center gap-3">
-                <img src={GoogleLogo} alt="Google" className="w-5 h-5 object-contain" />
+                <GoogleIcon />
                 <span>구글 로그인</span>
               </span>
             </button>
