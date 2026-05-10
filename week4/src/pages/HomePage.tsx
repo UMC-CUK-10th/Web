@@ -1,25 +1,35 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import LoadingSpinner from "../components/LoadingSpinner";
+import { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import ErrorDisplay from "../components/ErrorDisplay";
-import useGetLpList from "../hooks/useGetLpList";
+import LpCard from "../components/LpCard";
+import LpCardSkeletonList from "../components/LpCardSkeletonList";
+import useGetInfiniteLpList from "../hooks/useGetInfiniteLpList";
 
 const HomePage = () => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const { ref, inView } = useInView({ threshold: 0 });
 
-  const { data, isLoading, isError } = useGetLpList({
-    order,
-    cursor: 0,
-    limit: 30,
-  });
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useGetInfiniteLpList(30, order);
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
 
   if (isError) {
     return <ErrorDisplay />;
   }
+
+  const lpList = data?.pages.flatMap((page) => page.data.data) ?? [];
 
   return (
     <div className="p-8">
@@ -47,26 +57,32 @@ const HomePage = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
-        {data?.data.data.map((lp) => (
-          <Link
-            to={`/lp/${lp.id}`}
-            key={lp.id}
-            className="group relative block overflow-hidden rounded-lg"
-          >
-            <img
-              src={lp.thumbnail}
-              alt={`${lp.title} LP 이미지`}
-              className="aspect-square w-full rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
-            />
+      {isLoading && (
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+          <LpCardSkeletonList count={10} />
+        </div>
+      )}
 
-            <div className="absolute inset-0 flex scale-110 flex-col justify-center rounded-lg bg-black/70 text-center text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <h3 className="mb-1 text-lg font-bold">{lp.title}</h3>
-              <p>{new Date(lp.createdAt).toLocaleDateString()}</p>
-              <p>{lp.likes.length}</p>
-            </div>
-          </Link>
-        ))}
+      {!isLoading && (
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+          {lpList.map((lp) => (
+            <LpCard key={lp.id} lp={lp} />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && isFetching && !isFetchingNextPage && lpList.length === 0 && (
+        <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+          <LpCardSkeletonList count={10} />
+        </div>
+      )}
+
+      <div ref={ref} className="mt-6 min-h-10">
+        {isFetchingNextPage && (
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+            <LpCardSkeletonList count={5} />
+          </div>
+        )}
       </div>
     </div>
   );

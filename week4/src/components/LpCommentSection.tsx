@@ -14,7 +14,7 @@ const LpCommentSection = ({ lpid }: Props) => {
 
   const {
     data: comments,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
@@ -26,14 +26,16 @@ const LpCommentSection = ({ lpid }: Props) => {
   });
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetching) {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, isFetching, hasNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   if (isError) {
     return <ErrorDisplay />;
   }
+
+  const commentList = comments?.pages.flatMap((page) => page.data.data) ?? [];
 
   return (
     <div className="mt-2 text-rose-900">
@@ -63,11 +65,17 @@ const LpCommentSection = ({ lpid }: Props) => {
         </button>
       </div>
 
+      {isLoading && (
+        <div className="space-y-4">
+          <CommentSkeleton />
+          <CommentSkeleton />
+          <CommentSkeleton />
+        </div>
+      )}
+
       <ul className="space-y-4">
-        {comments?.pages
-          ?.map((page) => page.data.data)
-          ?.flat()
-          ?.map((user) => (
+        {!isLoading &&
+          commentList.map((user) => (
             <li
               key={user.id}
               className="flex gap-3 rounded-2xl bg-rose-50 px-4 py-3 ring-1 ring-rose-100"
@@ -86,6 +94,7 @@ const LpCommentSection = ({ lpid }: Props) => {
             </li>
           ))}
       </ul>
+
       <div ref={ref} className="mt-4 h-10">
         {isFetchingNextPage && <CommentSkeleton />}
       </div>
