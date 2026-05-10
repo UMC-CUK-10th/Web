@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent } from "react";
 
 interface UseFormProps<T> {
   initialValue: T;
@@ -7,21 +7,21 @@ interface UseFormProps<T> {
 
 function useForm<T>({ initialValue, validate }: UseFormProps<T>) {
   const [values, setValues] = useState(initialValue);
-  const [touch, setTouch] = useState<Record<string, boolean>>();
-  const [error, setError] = useState<Record<string, string>>();
+  const [touch, setTouch] = useState<Partial<Record<keyof T, boolean>>>({});
+  const error = validate(values) as Partial<Record<keyof T, string>>;
 
   const handleChange = (name: keyof T, text: string) => {
-    setValues({
-      ...values,
+    setValues((prevValues) => ({
+      ...prevValues,
       [name]: text,
-    });
+    }));
   };
 
   const handleBlur = (name: keyof T) => {
-    setTouch({
-      ...touch,
+    setTouch((prevTouch) => ({
+      ...prevTouch,
       [name]: true,
-    });
+    }));
   };
 
   const getInputProps = (name: keyof T) => {
@@ -33,11 +33,6 @@ function useForm<T>({ initialValue, validate }: UseFormProps<T>) {
 
     return { value, onChange, onBlur };
   };
-
-  useEffect(() => {
-    const newErrors = validate(values);
-    setError(newErrors);
-  }, [validate, values]);
 
   return { values, error, touch, getInputProps };
 }

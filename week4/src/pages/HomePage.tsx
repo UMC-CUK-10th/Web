@@ -1,21 +1,75 @@
-export const HomePage = () => {
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorDisplay from "../components/ErrorDisplay";
+import useGetLpList from "../hooks/useGetLpList";
+
+const HomePage = () => {
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+
+  const { data, isLoading, isError } = useGetLpList({
+    order,
+    cursor: 0,
+    limit: 30,
+  });
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorDisplay />;
+  }
+
   return (
-    <section className="flex w-full items-center justify-center">
-      <div className="grid w-full items-center gap-10 rounded-[32px] bg-white/75 p-8 shadow-xl ring-1 ring-rose-200 backdrop-blur md:grid-cols-2 md:p-12">
-        <div className="space-y-6">
-          <span className="inline-flex rounded-full bg-rose-100 px-4 py-1 text-sm font-semibold text-rose-600">
-            히히
-          </span>
-          <div className="space-y-3">
-            <h1 className="text-4xl font-black leading-tight text-rose-950 md:text-5xl">
-              홈페이지!!!
-            </h1>
-            <p className="max-w-xl text-base leading-7 text-rose-900/70">
-              안녕안녕
-            </p>
-          </div>
-        </div>
+    <div className="p-8">
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <button
+          onClick={() => setOrder("asc")}
+          className={`cursor-pointer rounded-md px-3 py-1 text-sm font-semibold transition-colors duration-200 ${
+            order === "asc"
+              ? "bg-gray-700 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          오래된순
+        </button>
+
+        <button
+          onClick={() => setOrder("desc")}
+          className={`cursor-pointer rounded-md px-3 py-1 text-sm font-semibold transition-colors duration-200 ${
+            order === "desc"
+              ? "bg-gray-700 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          최신순
+        </button>
       </div>
-    </section>
+
+      <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+        {data?.data.data.map((lp) => (
+          <Link
+            to={`/lp/${lp.id}`}
+            key={lp.id}
+            className="group relative block overflow-hidden rounded-lg"
+          >
+            <img
+              src={lp.thumbnail}
+              alt={`${lp.title} LP 이미지`}
+              className="aspect-square w-full rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
+            />
+
+            <div className="absolute inset-0 flex scale-110 flex-col justify-center rounded-lg bg-black/70 text-center text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <h3 className="mb-1 text-lg font-bold">{lp.title}</h3>
+              <p>{new Date(lp.createdAt).toLocaleDateString()}</p>
+              <p>{lp.likes.length}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 };
+
+export default HomePage;

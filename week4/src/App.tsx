@@ -1,14 +1,19 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, type RouteObject } from "react-router-dom";
 import "./App.css";
-import { HomePage } from "./pages/HomePage";
+import HomePage from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { LoginPage } from "./pages/LoginPage";
 import HomeLayout from "./layouts/HomeLayout";
 import SignupPage from "./pages/SignupPage";
 import MyPage from "./pages/MyPage";
+import { AuthProvider } from "./context/AuthContext";
 import ProtectedLayout from "./layouts/ProtectedLayout";
+import GooglePage from "./pages/GooglrPage";
+import { QueryClientProvider } from "@tanstack/react-query";
+import LpDetailPage from "./pages/LpDetailPage";
+import { queryClient } from "./lib/queryClient";
 
-const router = createBrowserRouter([
+const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <HomeLayout />,
@@ -17,18 +22,34 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
-      {
-        element: <ProtectedLayout />,
-        children: [
-          { path: "mypage", element: <MyPage /> },
-        ],
-      },
+      { path: "v1/auth/google/callback", element: <GooglePage /> },
     ],
   },
-]);
+];
+
+const protectedRoutes: RouteObject[] = [
+  {
+    path: "/mypage",
+    element: <ProtectedLayout />,
+    errorElement: <NotFoundPage />,
+    children: [{ index: true, element: <MyPage /> }],
+  },
+  {
+    path: "/lp/:lpid",
+    element: <ProtectedLayout />,
+    children: [{ index: true, element: <LpDetailPage /> }],
+  },
+];
+
+const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
+
 function App() {
   return (
-    <RouterProvider router={router} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

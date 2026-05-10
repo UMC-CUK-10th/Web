@@ -3,12 +3,20 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { postSignin } from "../apis/auth";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 import useForm from "../hooks/useForm";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { validateSignin, type UserSigninInformation } from "../utils/validate";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectPath = location.state?.from?.pathname || "/";
+  const { setItem: setAccessToken } = useLocalStorage(
+    LOCAL_STORAGE_KEY.accessToken
+  );
+  const { setItem: setRefreshToken } = useLocalStorage(
+    LOCAL_STORAGE_KEY.refreshToken
+  );
+  const { setItem: setUserName } = useLocalStorage(LOCAL_STORAGE_KEY.userName);
 
   const { values, error, touch, getInputProps } =
     useForm<UserSigninInformation>({
@@ -24,10 +32,11 @@ export const LoginPage = () => {
 
     try {
       const response = await postSignin(values);
-      const { accessToken, refreshToken } = response.data;
+      const { accessToken, refreshToken, name } = response.data;
 
-      localStorage.setItem(LOCAL_STORAGE_KEY.accessToken, accessToken);
-      localStorage.setItem(LOCAL_STORAGE_KEY.refreshToken, refreshToken);
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
+      setUserName(name);
 
       navigate(redirectPath, { replace: true });
     } catch (error) {
