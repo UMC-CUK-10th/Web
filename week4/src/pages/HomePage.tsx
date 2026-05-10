@@ -1,67 +1,85 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import useGetLpList from "../hooks/useGetLplist";
+import Lp from "../components/Lp";
 
-const HomePage = () => {
-  const navigate = useNavigate();
+function HomePage() {
+  const [search, setSearch] = useState("");
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+
+  const { data, isPending, isError } = useGetLpList({
+    search,
+    order,
+    sort: "createdAt",
+  });
+
+  if (isPending) {
+    return (
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#fafafa] text-xl font-medium text-gray-500">
+        Loading...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#fafafa] text-xl font-medium text-red-500">
+        Error.
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white text-gray-800">
-      <nav className="fixed top-0 left-0 z-20 w-full border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <h2
-            className="cursor-pointer text-xl font-bold text-pink-500"
-            onClick={() => navigate("/")}
-          >
-            lily web
-          </h2>
+    <div className="min-h-[calc(100vh-64px)] bg-[#fafafa] px-6 py-8 text-gray-800">
+      <div className="mx-auto max-w-6xl">
+        <section className="mb-8 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="LP 제목을 검색해보세요"
+            className="h-11 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100 sm:max-w-sm"
+          />
 
-          <div className="flex items-center gap-3">
+          <div className="flex gap-2">
             <button
-              onClick={() => navigate("/login")}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              type="button"
+              className={`h-10 rounded-xl border px-4 text-sm font-medium transition ${
+                order === "asc"
+                  ? "border-pink-500 bg-pink-500 text-white"
+                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+              onClick={() => setOrder("asc")}
             >
-              로그인
+              오래된순
             </button>
+
             <button
-              onClick={() => navigate("/signup")}
-              className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-600"
+              type="button"
+              className={`h-10 rounded-xl border px-4 text-sm font-medium transition ${
+                order === "desc"
+                  ? "border-pink-500 bg-pink-500 text-white"
+                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+              onClick={() => setOrder("desc")}
             >
-              회원가입
+              최신순
             </button>
           </div>
-        </div>
-      </nav>
-
-      <main className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pt-16">
-        <section className="text-center">
-          <p className="mb-3 text-2xl font-medium text-pink-500">Welcome</p>
-          
         </section>
 
-        <section className="mt-14 grid gap-5 md:grid-cols-3">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">홈 화면</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              첫 화면에서 서비스의 기본 정보를 간단하게 확인할 수 있습니다.
-            </p>
+        {data && data.length > 0 ? (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {data.map((lp) => (
+              <Lp key={lp.id} lp={lp} />
+            ))}
           </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">로그인 화면</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              이메일과 비밀번호를 입력하고 로그인할 수 있습니다.
-            </p>
+        ) : (
+          <div className="rounded-2xl border border-gray-200 bg-white py-16 text-center text-gray-500 shadow-sm">
+            등록된 LP가 없습니다.
           </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">회원가입 화면</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              회원 정보를 입력하고 새로운 계정을 생성할 수 있습니다.
-            </p>
-          </div>
-        </section>
-      </main>
+        )}
+      </div>
     </div>
   );
-};
+}
 
 export default HomePage;

@@ -1,11 +1,24 @@
-import {Outlet} from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
-const HomeLayout = () => {
-  return <div className="h-dvh flex flex-col">
-    <nav>네비게이션 바입니다.</nav>
-    <main className="flex-1"><Outlet/></main>
-    <footer>footer</footer>
-  </div>
-};
+function HomeLayout() {
+  const navigate = useNavigate();
+  return (
+    <div className="h-dvh flex flex-col">
+      <Navbar />
+      <main className="mt-16 flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+      <button
+        onClick={() => navigate("#")}
+        className="text-2xl flex justify-center items-center cursor-pointer fixed bottom-6 right-6 bg-blue-600 text-white size-14 rounded-full"
+      >
+        <span className="mb-1">+</span>
+      </button>
+    </div>
+  );
+}
 
 export default HomeLayout;

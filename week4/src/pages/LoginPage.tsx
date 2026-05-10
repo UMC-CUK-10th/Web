@@ -1,15 +1,13 @@
-import { postSignin } from "../apis/auth.ts";
-import { LOCAL_STORAGE_KEY } from "../constants/key.ts";
 import useForm from "../hooks/useForm";
-import { useLocalStorage } from "../hooks/useLocalStorage.ts";
 import { type UserSigninInformatin, validateSignin } from "../utils/validate";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { setItem } = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
+  const { login } = useAuth();
 
   const { values, error, touched, getInputProps } =
     useForm<UserSigninInformatin>({
@@ -25,13 +23,13 @@ const LoginPage = () => {
   const handleSubmit = async () => {
     if (isDisabled) return;
 
-    try {
-      const response = await postSignin(values);
-      setItem(response.data.accessToken);
+    const isSuccess = await login(values);
+
+    if (isSuccess) {
       alert("로그인에 성공하였습니다.");
-      navigate("/my");
-    } catch (error: any) {
-      alert(`로그인에 실패했습니다: ${error?.message ?? "다시 시도해주세요."}`);
+      navigate("/");
+    } else {
+      alert("로그인에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
