@@ -35,7 +35,6 @@ const LpDetailPage = () => {
     }
   }, [lp]);
 
-  // 1. 이미지 업로드 (v1/uploads)
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -48,7 +47,6 @@ const LpDetailPage = () => {
     onSuccess: (imageUrl) => setDisplayData((prev) => ({ ...prev, thumbnail: imageUrl })),
   });
 
-  // 2. LP 정보 수정 (PATCH)
   const updateLpMutation = useMutation({
     mutationFn: (body: typeof displayData) => axiosInstance.patch(`/v1/lps/${lpid}`, body),
     onSuccess: () => {
@@ -58,7 +56,6 @@ const LpDetailPage = () => {
     },
   });
 
-  // 3. LP 삭제 (DELETE)
   const deleteLpMutation = useMutation({
     mutationFn: () => axiosInstance.delete(`/v1/lps/${lpid}`),
     onSuccess: () => {
@@ -68,7 +65,6 @@ const LpDetailPage = () => {
     onError: (error: any) => alert("삭제 실패: " + (error.response?.data?.message || "권한이 없습니다."))
   });
 
-  // 4. 댓글 관련 로직
   const { data: commentsData } = useQuery({
     queryKey: ["lp-comments", lpid],
     queryFn: async () => {
@@ -112,7 +108,6 @@ const LpDetailPage = () => {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      {/* 상단 버튼 영역 (삭제 버튼 복구 완료!) */}
       <div className="flex justify-between items-center mb-10">
         <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-black font-medium transition-colors">← Back</button>
         <div className="flex gap-2">
@@ -164,7 +159,6 @@ const LpDetailPage = () => {
         </div>
       </div>
 
-      {/* 댓글 섹션 */}
       <section className="bg-gray-100/60 rounded-[3rem] p-8 md:p-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">댓글 <span className="text-blue-500">{comments.length}</span></h2>
         

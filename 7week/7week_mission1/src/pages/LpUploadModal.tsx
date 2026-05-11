@@ -49,7 +49,7 @@ const LpUploadModal = ({ onClose }: LpUploadModalProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["infiniteLpList"] });
       onClose();
-      alert("LP가 성공적으로 등록되었습니다!");
+      alert("LP가 등록되었습니다!");
     },
     onError: (error: any) => {
       console.error("등록 실패 사유:", error.response?.data || error.message);

@@ -1,9 +1,6 @@
-// src/hooks/useLocalStorage.ts
-
 export const useLocalStorage = (key: string) => {
   const setItem = (value: unknown) => {
     try {
-      // ✅ 값 자체가 문자열이면 그대로 저장, 아니면 JSON화
       const stringValue = typeof value === "string" ? value : JSON.stringify(value);
       window.localStorage.setItem(key, stringValue);
     } catch (error) {

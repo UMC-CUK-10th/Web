@@ -12,7 +12,6 @@ const MyPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", bio: "", avatar: "" });
 
-  // 초기 데이터 로드
   useEffect(() => {
     const getData = async () => {
       try {
@@ -32,7 +31,6 @@ const MyPage = () => {
     getData();
   }, []);
 
-  // 1. 정보 수정 Mutation
   const updateMutation = useMutation({
     mutationFn: updateMyInfo,
     onSuccess: (updatedData) => {
@@ -44,12 +42,11 @@ const MyPage = () => {
     onError: () => alert("수정에 실패했습니다. 주소를 확인해주세요."),
   });
 
-  // 2. 회원 탈퇴 Mutation
   const withdrawMutation = useMutation({
     mutationFn: deleteAccount,
     onSuccess: () => {
       alert("탈퇴되었습니다.");
-      logout(); // AuthContext에 구현된 로그아웃(Mutation 기반) 호출
+      logout();
     },
     onError: () => alert("탈퇴 처리에 실패했습니다."),
   });
@@ -58,10 +55,8 @@ const MyPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-8">
-      {/* 상단 프로필 영역 */}
       <div className="flex flex-col items-center border-b pb-10">
         <div className="relative group">
-          {/* ✅ 프로필 이미지가 있으면 띄우고, 없으면 회색 아이콘 UI 출력 */}
           {data.data.avatar ? (
             <img
               src={data.data.avatar as string}
@@ -90,7 +85,6 @@ const MyPage = () => {
         {data.data.bio && <p className="text-gray-400 mt-2 italic text-center">"{data.data.bio}"</p>}
       </div>
 
-      {/* 수정 UI */}
       {isEditing && (
         <div className="mt-10 bg-white p-6 rounded-2xl shadow-md border border-gray-100 space-y-4 transition-all">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">정보 수정</h2>
@@ -130,7 +124,6 @@ const MyPage = () => {
         </div>
       )}
 
-      {/* 하단 버튼 영역 */}
       <div className="mt-12 flex flex-col items-center gap-4">
         <button 
           className="text-gray-400 underline hover:text-red-500 transition-colors text-sm" 
