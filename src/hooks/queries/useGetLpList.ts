@@ -8,9 +8,7 @@ const initialLpListData: ResponseLpListDto = {
   status: true,
   statusCode: 200,
   message: '',
-  data: {
-    data: [],
-  },
+  data: null,
   nextCursor: 0,
   hasNext: false,
 };
