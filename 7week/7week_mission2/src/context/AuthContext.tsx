@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     onSettled: () => {
       removeAccess();
       removeRefresh();
-      localStorage.removeItem("userId"); // ✅ 추가
+      localStorage.removeItem("userId");
       setAccessToken(null);
       setUser(null);
       delete axiosInstance.defaults.headers.common["Authorization"];
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         try {
           const userRes = await getMyInfo();
           setUser(userRes.data);
-          localStorage.setItem("userId", String(userRes.data?.id ?? "")); // ✅ 추가
+          localStorage.setItem("userId", String(userRes.data?.id ?? ""));
           window.location.href = "/";
         } catch (e) {
           console.error("유저 정보 로드 실패", e);
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${cleanToken}`;
           const response = await getMyInfo();
           setUser(response.data);
-          localStorage.setItem("userId", String(response.data?.id ?? "")); // ✅ 추가
+          localStorage.setItem("userId", String(response.data?.id ?? ""));
         }
       } catch (error: any) {
         if (error.response?.status === 401) {

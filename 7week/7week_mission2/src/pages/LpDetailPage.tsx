@@ -11,7 +11,6 @@ const LpDetailPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const myUserId = Number(localStorage.getItem("userId") || "0");
-  // ✅ 수정: 렌더 시점 스냅샷 token 변수 제거 (mutationFn 안에서 직접 읽도록 변경)
 
   const [isEditing, setIsEditing] = useState(false);
   const [displayData, setDisplayData] = useState({ title: "", content: "", thumbnail: "" });
@@ -19,7 +18,6 @@ const LpDetailPage = () => {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editCommentValue, setEditCommentValue] = useState("");
 
-  // 1. 데이터 조회
   const { data: lp, isLoading: isLpLoading } = useQuery<any>({ 
     queryKey: ["lp", lpid],
     queryFn: async () => {
@@ -42,11 +40,8 @@ const LpDetailPage = () => {
     }
   }, [lp]);
 
-  // 2. 좋아요 Mutation
-  // ✅ 수정: wasLiked를 변수로 받아서 onMutate가 캐시를 바꾸기 전 원본 상태로 분기
   const likeMutation = useMutation({
     mutationFn: async (wasLiked: boolean) => {
-      // ✅ 수정: 호출 시점에 localStorage에서 직접 읽어 스냅샷 문제 방지
       const currentToken = localStorage.getItem("accessToken")?.replace(/['"]+/g, "").trim();
       if (!currentToken || currentToken === "null") {
         alert("로그인이 필요합니다.");
@@ -76,7 +71,6 @@ const LpDetailPage = () => {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["lp", lpid] }),
   });
 
-  // 3. 게시글 수정/삭제 및 이미지 업로드
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -97,7 +91,7 @@ const LpDetailPage = () => {
     onSuccess: () => { alert("삭제되었습니다."); navigate("/", { replace: true }); },
   });
 
-  // 4. 댓글 관련 로직
+  //댓글
   const { data: commentsData } = useQuery({
     queryKey: ["lp-comments", lpid],
     queryFn: async () => {
@@ -138,7 +132,6 @@ const LpDetailPage = () => {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      {/* 상단 버튼 바 */}
       <div className="flex justify-between items-center mb-10">
         <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-black font-medium transition-colors">← Back</button>
         <div className="flex gap-2">
@@ -153,7 +146,6 @@ const LpDetailPage = () => {
         </div>
       </div>
 
-      {/* 메인 컨텐츠 (LP 이미지 및 정보) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
         <div className="flex flex-col items-center gap-6">
           <div className={`relative ${!isEditing && "animate-lp-spin"}`}>
@@ -173,7 +165,6 @@ const LpDetailPage = () => {
         <div className="flex flex-col gap-6">
           {!isEditing ? (
             <div className="animate-fade-in">
-              {/* ✅ 수정: mutate()에 현재 isLiked 상태를 인자로 전달 */}
               <button 
                 onClick={() => likeMutation.mutate(lp?.isLiked ?? false)}
                 disabled={likeMutation.isPending}
@@ -199,7 +190,7 @@ const LpDetailPage = () => {
         </div>
       </div>
 
-      {/* 댓글 섹션 */}
+      {/*댓글*/}
       <section className="bg-gray-100/60 rounded-[3rem] p-8 md:p-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">댓글 <span className="text-blue-500">{comments.length}</span></h2>
         <div className="flex gap-3 mb-10">

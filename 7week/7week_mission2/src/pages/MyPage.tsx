@@ -11,13 +11,11 @@ const MyPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", bio: "", avatar: "" });
 
-  // 1. 유저 정보 조회 (Navbar와 동일한 ["myInfo"] 키 사용)
   const { data: myInfoData } = useQuery<ResponseMyInfoDto>({
     queryKey: ["myInfo"],
     queryFn: getMyInfo,
   });
 
-  // 데이터 로드 시 수정 폼 초기화
   useEffect(() => {
     if (myInfoData?.data) {
       setEditForm({
@@ -28,17 +26,13 @@ const MyPage = () => {
     }
   }, [myInfoData]);
 
-  // 2. 낙관적 업데이트 Mutation
   const updateMutation = useMutation({
     mutationFn: updateMyInfo,
     onMutate: async (newEditData) => {
-      // 진행 중인 리프레시 중단
       await queryClient.cancelQueries({ queryKey: ["myInfo"] });
 
-      // 기존 값 스냅샷
       const previousUserInfo = queryClient.getQueryData<ResponseMyInfoDto>(["myInfo"]);
 
-      // 캐시 즉시 업데이트 (이 코드가 Navbar를 새로고침 없이 바꿈)
       if (previousUserInfo) {
         queryClient.setQueryData(["myInfo"], {
           ...previousUserInfo,
@@ -58,7 +52,6 @@ const MyPage = () => {
       }
     },
     onSettled: () => {
-      // 서버 데이터와 최종 동기화
       queryClient.invalidateQueries({ queryKey: ["myInfo"] });
       setIsEditing(false);
     },

@@ -9,7 +9,6 @@ const Navbar = () => {
   const { accessToken, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // ✅ MyPage와 동일한 쿼리 키 사용 → 수정 시 자동 반영
   const { data: myInfoData } = useQuery({
     queryKey: ["myInfo"],
     queryFn: getMyInfo,
@@ -50,7 +49,6 @@ const Navbar = () => {
 
           {accessToken && (
             <div className="flex items-center gap-3">
-              {/* ✅ 쿼리에서 읽은 최신 이름 사용 */}
               <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                 {userName}님 환영합니다!
               </span>
