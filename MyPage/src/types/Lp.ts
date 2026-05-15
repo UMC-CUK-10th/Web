@@ -9,8 +9,12 @@ export interface Like {
     lpId: number;
 }
 
-export interface Lp {
+export interface LpBase {
     id: number;
+    likes: Like[];
+}
+
+export interface Lp extends LpBase {
     title: string;
     content: string;
     thumbnail: string;
@@ -19,7 +23,6 @@ export interface Lp {
     createdAt: string;
     updatedAt: string;
     tags: Tag[];
-    likes: Like[];
 }
 
 export interface LpListResponse {
@@ -28,11 +31,9 @@ export interface LpListResponse {
     hasNext: boolean;
 }
 
-export interface LpResponse {
-    id: number;
+export interface LpResponse extends LpBase{
     title: string;
     content: string;
     thumbnail: string;
     tags: Tag[];
-    likes: Like[];
 }

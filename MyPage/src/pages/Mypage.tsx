@@ -2,7 +2,8 @@ import { useUserContext } from "../context/UserContext";
 import { useUser } from "../hooks/useUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import type { UpdateUserRequest } from "../types/User";
+import type { UpdateUserRequest, User } from "../types/User";
+
 
 export default function Mypage() {
     const { user, logout } = useUserContext();
@@ -17,11 +18,31 @@ export default function Mypage() {
 
     const { mutate: editProfile, isPending } = useMutation({
         mutationFn: updateUser,
+        onMutate: async (newData) => {
+            await queryClient.cancelQueries({ queryKey: ["user"] })
+
+            const previousUser = queryClient.getQueryData(["user"]);
+
+            queryClient.setQueryData(["user"], (old: User) => ({
+                ...old,
+                ...newData,
+            }));
+
+            return { previousUser };
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["user"] }),
             setIsEditing(false);
         },
-        onError: (error) => alert(error.message)
+        onError: (error, _, context) => {
+            queryClient.setQueryData(["user"], context?.previousUser);
+            alert(error.message);
+        },
+        onSettled: () => {
+            // 성공/실패 관계없이 최종적으로 서버 데이터로 동기화
+            queryClient.invalidateQueries({ queryKey: ["user"] });
+            setIsEditing(false);
+        },
     });
 
     if (!user) return <div className="text-sm text-gray-400">유저가 없습니다.</div>;

@@ -1,5 +1,3 @@
-// hooks/useMe.ts
-import { useEffect, useState } from "react";
 import type { User } from "../types/User";
 import { useQuery } from "@tanstack/react-query";
 import type { UpdateUserRequest } from "../types/User";

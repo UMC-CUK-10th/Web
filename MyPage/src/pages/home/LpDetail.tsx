@@ -1,18 +1,19 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useLpDetail } from "../../hooks/useLpDetail";
+import { fetchLpDetail } from "../../hooks/fetchLpDetail";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useState } from "react";
 import LpCommentsModal from "./LpCommentsModal";
+import LpLikeButton from "../../components/Lp/LpLikeButton";
 
 export default function LpDetail() {
     const { id } = useParams();
 
     const { data, isLoading, isError } = useQuery({ 
-        queryKey: ["lp", id], 
+        queryKey: ["lp", Number(id)], 
         queryFn: () => {
             if (!id) throw new Error("ID가 없습니다.");
-            return useLpDetail(id)
+            return fetchLpDetail(Number(id));
         },
         enabled: !!id,
     });
@@ -54,13 +55,7 @@ export default function LpDetail() {
                         </p>
 
                         <div className="flex items-center justify-center gap-4 pt-6">
-                            <button className="bg-red-400 text-white 
-                                rounded-lg py-2 w-full
-                                text-sm font-medium
-                                hover:bg-red-500 transition"
-                            >
-                                <span className="text-lg">좋아요 {data.likes.length}</span>
-                            </button>
+                            <LpLikeButton lp={data}/>
                             <button className="bg-blue-400 text-white 
                                 rounded-lg py-2 w-full
                                 text-sm font-medium
