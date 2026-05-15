@@ -1,6 +1,8 @@
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getMyInfo, postLogout } from "../apis/auth";
+import { deleteMyAccount, getMyInfo, postLogout } from "../apis/auth";
+import LpCreateModal from "../components/LpCreateModal";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
@@ -18,6 +20,9 @@ const HomeLayout = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getAccessToken());
   const [userName, setCurrentUserName] = useState<string>(() => getUserName() ?? "");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLpCreateModalOpen, setIsLpCreateModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [authActionError, setAuthActionError] = useState("");
 
   useEffect(() => {
     const accessToken = getAccessToken();
@@ -47,20 +52,41 @@ const HomeLayout = () => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
-  const handleLogout = async () => {
-    try {
-      await postLogout();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      removeAccessToken();
-      removeRefreshToken();
-      removeUserName();
-      setIsLoggedIn(false);
-      setCurrentUserName("");
-      navigate("/", { replace: true });
-    }
+  const clearAuthState = () => {
+    removeAccessToken();
+    removeRefreshToken();
+    removeUserName();
+    setIsLoggedIn(false);
+    setCurrentUserName("");
   };
+
+  const logoutMutation = useMutation({
+    mutationFn: postLogout,
+    onSuccess: () => {
+      clearAuthState();
+      setAuthActionError("");
+      navigate("/", { replace: true });
+    },
+    onError: (error) => {
+      console.error(error);
+      clearAuthState();
+      navigate("/", { replace: true });
+    },
+  });
+
+  const withdrawMutation = useMutation({
+    mutationFn: deleteMyAccount,
+    onSuccess: () => {
+      clearAuthState();
+      setIsWithdrawModalOpen(false);
+      setAuthActionError("");
+      navigate("/login", { replace: true });
+    },
+    onError: (error) => {
+      console.error(error);
+      setAuthActionError("회원 탈퇴에 실패했습니다.");
+    },
+  });
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-colors ${
@@ -73,8 +99,6 @@ const HomeLayout = () => {
         ? "bg-rose-100 text-rose-700"
         : "text-rose-900/70 hover:bg-rose-50 hover:text-rose-700"
     }`;
-
-  const floatingButtonPath = isLoggedIn ? "/mypage" : "/signup";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-100 text-gray-900">
@@ -140,10 +164,18 @@ const HomeLayout = () => {
                   </p>
                   <button
                     type="button"
-                    onClick={handleLogout}
+                    onClick={async () => {
+                      setAuthActionError("");
+                      try {
+                        await logoutMutation.mutateAsync();
+                      } catch {
+                        return;
+                      }
+                    }}
+                    disabled={logoutMutation.isPending}
                     className="rounded-full border border-rose-300 bg-white/80 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:border-rose-500 hover:text-rose-600"
                   >
-                    로그아웃
+                    {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
                   </button>
                 </>
               ) : (
@@ -205,9 +237,21 @@ const HomeLayout = () => {
                 홈
               </NavLink>
               {isLoggedIn ? (
-                <NavLink to="/mypage" className={sidebarLinkClass}>
-                  마이페이지
-                </NavLink>
+                <>
+                  <NavLink to="/mypage" className={sidebarLinkClass}>
+                    마이페이지
+                  </NavLink>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsWithdrawModalOpen(true);
+                      setAuthActionError("");
+                    }}
+                    className="rounded-2xl px-4 py-3 text-left text-sm font-semibold text-red-500 transition-colors hover:bg-rose-50"
+                  >
+                    탈퇴하기
+                  </button>
+                </>
               ) : (
                 <>
                   <NavLink to="/login" className={sidebarLinkClass}>
@@ -227,13 +271,67 @@ const HomeLayout = () => {
         </main>
       </div>
 
-      <Link
-        to={floatingButtonPath}
-        aria-label="빠른 이동"
+      <button
+        type="button"
+        aria-label={isLoggedIn ? "LP 글 작성 모달 열기" : "회원가입 페이지로 이동"}
+        onClick={() => {
+          if (isLoggedIn) {
+            setIsLpCreateModalOpen(true);
+            return;
+          }
+
+          navigate("/signup");
+        }}
         className="fixed right-5 bottom-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 text-3xl font-light text-white shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
       >
         +
-      </Link>
+      </button>
+
+      <LpCreateModal
+        isOpen={isLpCreateModalOpen}
+        onClose={() => setIsLpCreateModalOpen(false)}
+      />
+
+      {isWithdrawModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-rose-950/45 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl ring-1 ring-rose-100">
+            <h2 className="text-xl font-black text-rose-950">정말 탈퇴하시겠습니까?</h2>
+            <p className="mt-3 text-sm text-rose-900/70">
+              탈퇴하면 계정 정보와 작성한 데이터가 삭제됩니다.
+            </p>
+            {authActionError && (
+              <p className="mt-3 text-sm text-red-500">{authActionError}</p>
+            )}
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsWithdrawModalOpen(false);
+                  setAuthActionError("");
+                }}
+                className="flex-1 rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-50"
+              >
+                아니오
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setAuthActionError("");
+                  try {
+                    await withdrawMutation.mutateAsync();
+                  } catch {
+                    return;
+                  }
+                }}
+                disabled={withdrawMutation.isPending}
+                className="flex-1 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {withdrawMutation.isPending ? "탈퇴 중..." : "예"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
