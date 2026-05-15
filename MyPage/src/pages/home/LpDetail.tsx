@@ -6,6 +6,8 @@ import { useState } from "react";
 import LpCommentsModal from "./LpCommentsModal";
 import LpLikeButton from "../../components/Lp/LpLikeButton";
 
+// sd
+
 export default function LpDetail() {
     const { id } = useParams();
 
