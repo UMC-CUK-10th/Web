@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function GoogleCallback() {
     const navigate = useNavigate();
@@ -20,5 +21,5 @@ export default function GoogleCallback() {
         }
     }, [navigate]);
 
-    return <div>로그인 중입니다...</div>;
+    return <LoadingSpinner title="로그인 중입니다..."/>;
 }

@@ -1,36 +1,28 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
-
-// 유저 데이터 타입 정의
-interface User {
-  name: string;
-  email: string;
-  id: number;
-}
+import { useUser } from "../hooks/useUser";
+import type { User } from "../types/User";
 
 interface UserContextType {
   user: User | null;
-  setUser: (user: User | null) => void;
-  isInitialized: boolean;
-  setIsInitialized: (val: boolean) => void;
+  loading: boolean;
+  logout: () => void;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | null>(null);
 
-// context/UserContext.tsx
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { user, loading, logout } = useUser();
 
   return (
-    <UserContext.Provider value={{ user, setUser, isInitialized, setIsInitialized }}>
+    <UserContext.Provider value={{ user, loading, logout }}>
       {children}
     </UserContext.Provider>
-  );
+  )
 }
 
-export const useUser = () => {
+export function useUserContext() {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
+  if (!context) throw new Error("UserProvider 안에서 사용해야 합니다");
   return context;
-};
+}

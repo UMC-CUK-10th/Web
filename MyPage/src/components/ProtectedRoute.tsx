@@ -1,12 +1,16 @@
-// components/ProtectedRoute.tsx
-import { Navigate, useLocation, Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useUserContext } from "../context/UserContext";
 
-export default function ProtectedRoute({ isLogin }: { isLogin: boolean }) {
-  const location = useLocation();
+interface ProtectedRouteProps {
+    children?: React.ReactNode;
+}
 
-  if (!isLogin) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+    const { user } = useUserContext();
 
-  return <Outlet />;
+    if (!user) {
+        return <Navigate to="/login" replace />     
+    }
+
+    return children ? <>{children}</> : <Outlet />;
 }
