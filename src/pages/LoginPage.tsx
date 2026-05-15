@@ -1,7 +1,11 @@
+import { postSignin } from "../apis/auth";
+import { LOCAL_STORAGE_KEY } from "../constants/key";
 import useForm from "../hooks/useForm";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { validateSignin, type UserSigninInformation, } from "../utils/validate";
 
 const LoginPage = () => {
+    const {setItem} = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
     const {values, errors, touched, getInputProps} = useForm<UserSigninInformation>({
         initialValue: {
             email: "",
@@ -10,8 +14,16 @@ const LoginPage = () => {
         validate: validateSignin,
     });
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         console.log(values);
+        try {
+            const response = await postSignin(values);
+            setItem(response.data.accessToken);
+        } catch (error) {
+            if (error instanceof Error) {
+            alert(error.message);
+            }
+        }
     }
 
     //오류가 하나라도 있거나, 비어있으면 버튼 비활성화
