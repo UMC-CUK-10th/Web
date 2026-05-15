@@ -6,6 +6,8 @@ import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { type ResponseMyInfoDto } from "../types/auth";
 
+const USER_NAME_UPDATED_EVENT = "user-name-updated";
+
 const MyPage = () => {
   const [data, setData] = useState<ResponseMyInfoDto | null>(null);
   const [isSettingOpen, setIsSettingOpen] = useState(false);
@@ -38,13 +40,64 @@ const MyPage = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: patchMyInfo,
+    onMutate: async (nextProfile) => {
+      const previousData = data;
+      const previousUserName = data?.data.name ?? "";
+
+      if (previousData?.data) {
+        const optimisticData: ResponseMyInfoDto = {
+          ...previousData,
+          data: {
+            ...previousData.data,
+            name: nextProfile.name ?? previousData.data.name,
+            bio:
+              nextProfile.bio === undefined
+                ? previousData.data.bio
+                : nextProfile.bio ?? null,
+            avatar:
+              nextProfile.avatar === undefined
+                ? previousData.data.avatar
+                : nextProfile.avatar ?? null,
+          },
+        };
+
+        setData(optimisticData);
+      }
+
+      if (nextProfile.name) {
+        setUserName(nextProfile.name);
+        window.dispatchEvent(
+          new CustomEvent(USER_NAME_UPDATED_EVENT, {
+            detail: { name: nextProfile.name },
+          })
+        );
+      }
+
+      return { previousData, previousUserName };
+    },
     onSuccess: (response) => {
       setData(response);
       setUserName(response.data.name);
+      window.dispatchEvent(
+        new CustomEvent(USER_NAME_UPDATED_EVENT, {
+          detail: { name: response.data.name },
+        })
+      );
       setIsSettingOpen(false);
       setSubmitError("");
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context?.previousData) {
+        setData(context.previousData);
+      }
+
+      setUserName(context?.previousUserName ?? "");
+      window.dispatchEvent(
+        new CustomEvent(USER_NAME_UPDATED_EVENT, {
+          detail: { name: context?.previousUserName ?? "" },
+        })
+      );
+
       if (axios.isAxiosError(error)) {
         const message =
           error.response?.data?.message ??

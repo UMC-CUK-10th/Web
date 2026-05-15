@@ -10,6 +10,10 @@ import { useAuth } from "../context/auth-context";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorDisplay from "../components/ErrorDisplay";
 import LpCommentSection from "../components/LpCommentSection";
+import type { Likes, LpDetail } from "../types/lp";
+
+type LpDetailQueryData = { data: LpDetail };
+type LikeMutationContext = { previousLpDetail?: LpDetailQueryData };
 
 const LpDetailPage = () => {
   const navigate = useNavigate();
@@ -54,8 +58,58 @@ const LpDetailPage = () => {
 
   const likeMutation = useMutation({
     mutationFn: likeLp,
-    onSuccess: invalidateLpQueries,
-    onError: (error) => {
+    onMutate: async (targetLpId) => {
+      if (!user) {
+        return {};
+      }
+
+      await queryClient.cancelQueries({
+        queryKey: [QUERY_KEY.lps, targetLpId],
+      });
+
+      const previousLpDetail = queryClient.getQueryData<LpDetailQueryData>([
+        QUERY_KEY.lps,
+        targetLpId,
+      ]);
+
+      queryClient.setQueryData<LpDetailQueryData>(
+        [QUERY_KEY.lps, targetLpId],
+        (oldData) => {
+          if (!oldData?.data) {
+            return oldData;
+          }
+
+          const alreadyLiked = oldData.data.likes.some(
+            (like) => like.userId === user.id
+          );
+
+          if (alreadyLiked) {
+            return oldData;
+          }
+
+          const optimisticLike: Likes = {
+            id: Date.now(),
+            userId: user.id,
+            lpId: oldData.data.id,
+          };
+
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              likes: [...oldData.data.likes, optimisticLike],
+            },
+          };
+        }
+      );
+
+      return { previousLpDetail };
+    },
+    onError: (error, targetLpId, context: LikeMutationContext | undefined) => {
+      if (context?.previousLpDetail) {
+        queryClient.setQueryData([QUERY_KEY.lps, targetLpId], context.previousLpDetail);
+      }
+
       if (axios.isAxiosError(error)) {
         const message =
           error.response?.data?.message ??
@@ -67,12 +121,51 @@ const LpDetailPage = () => {
 
       setActionError("좋아요 처리에 실패했습니다.");
     },
+    onSettled: async () => {
+      await invalidateLpQueries();
+    },
   });
 
   const unlikeMutation = useMutation({
     mutationFn: unlikeLp,
-    onSuccess: invalidateLpQueries,
-    onError: (error) => {
+    onMutate: async (targetLpId) => {
+      if (!user) {
+        return {};
+      }
+
+      await queryClient.cancelQueries({
+        queryKey: [QUERY_KEY.lps, targetLpId],
+      });
+
+      const previousLpDetail = queryClient.getQueryData<LpDetailQueryData>([
+        QUERY_KEY.lps,
+        targetLpId,
+      ]);
+
+      queryClient.setQueryData<LpDetailQueryData>(
+        [QUERY_KEY.lps, targetLpId],
+        (oldData) => {
+          if (!oldData?.data) {
+            return oldData;
+          }
+
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              likes: oldData.data.likes.filter((like) => like.userId !== user.id),
+            },
+          };
+        }
+      );
+
+      return { previousLpDetail };
+    },
+    onError: (error, targetLpId, context: LikeMutationContext | undefined) => {
+      if (context?.previousLpDetail) {
+        queryClient.setQueryData([QUERY_KEY.lps, targetLpId], context.previousLpDetail);
+      }
+
       if (axios.isAxiosError(error)) {
         const message =
           error.response?.data?.message ??
@@ -83,6 +176,9 @@ const LpDetailPage = () => {
       }
 
       setActionError("좋아요 취소에 실패했습니다.");
+    },
+    onSettled: async () => {
+      await invalidateLpQueries();
     },
   });
 
