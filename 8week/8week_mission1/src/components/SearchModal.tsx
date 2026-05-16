@@ -14,15 +14,8 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("TITLE");
 
-  /**
-   * debounce 적용
-   * 300ms 동안 입력이 멈추면 값 반영
-   */
   const debouncedQuery = useDebounce(searchTerm, 300);
 
-  /**
-   * debounce 확인용 콘솔
-   */
   console.log("실시간 입력값:", searchTerm);
   console.log("디바운스 적용 값:", debouncedQuery);
 
@@ -34,15 +27,9 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
     status,
     error,
   } = useInfiniteQuery<ResponseLpListDto>({
-    /**
-     * debounce된 검색어를 queryKey에 포함
-     */
     queryKey: ["search", debouncedQuery, searchType],
 
     queryFn: async ({ pageParam }) => {
-      /**
-       * 실제 API 요청 시점 확인용
-       */
       console.log("API 요청 실행:", debouncedQuery);
 
       let url = "";
@@ -50,23 +37,13 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       const params: Record<string, any> = {
         limit: 10,
       };
-
-      /**
-       * cursor가 있을 때만 추가
-       */
       if (pageParam) {
         params.cursor = pageParam;
       }
 
-      /**
-       * 태그 검색
-       */
       if (searchType === "TAG") {
         url = `/v1/lps/tag/${encodeURIComponent(debouncedQuery)}`;
       } else {
-        /**
-         * 제목 검색
-         */
         url = `/v1/lps`;
         params.search = debouncedQuery;
       }
@@ -80,15 +57,8 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
     initialPageParam: null,
 
-    /**
-     * 빈 문자열 / 공백 요청 방지
-     * 모달 열렸을 때만 요청
-     */
     enabled: isOpen && debouncedQuery.trim().length > 0,
 
-    /**
-     * cursor 기반 pagination
-     */
     getNextPageParam: (lastPage) => {
       const pageData = lastPage?.data;
 
@@ -97,25 +67,13 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
         : undefined;
     },
 
-    /**
-     * 불필요한 재요청 감소
-     */
     staleTime: 1000 * 60,
 
-    /**
-     * cacheTime(v4) -> gcTime(v5)
-     */
     gcTime: 1000 * 60 * 5,
   });
 
-  /**
-   * 모달 닫혀있으면 렌더링 안 함
-   */
   if (!isOpen) return null;
 
-  /**
-   * 검색 결과 비어있는지 확인
-   */
   const isEmpty =
     status === "success" &&
     data?.pages?.every(
@@ -124,7 +82,6 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[#121212]/95 text-white p-6 overflow-hidden transition-all">
-      {/* 닫기 버튼 */}
       <div className="flex justify-end">
         <button
           onClick={onClose}
@@ -147,7 +104,6 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
       </div>
 
       <div className="max-w-4xl mx-auto w-full mt-16 px-4 flex-1 flex flex-col overflow-hidden">
-        {/* 검색 영역 */}
         <div className="flex items-center border-b border-gray-500 pb-2 mb-6">
           <input
             autoFocus
@@ -176,23 +132,19 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
           </select>
         </div>
 
-        {/* 결과 영역 */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {/* 입력 전 안내 */}
           {!debouncedQuery.trim() && (
             <p className="text-center py-10 text-gray-500">
               검색어를 입력하여 LP를 찾아보세요.
             </p>
           )}
 
-          {/* 로딩 */}
           {status === "pending" && debouncedQuery && (
             <p className="text-center py-10 text-gray-500">
               검색 중...
             </p>
           )}
 
-          {/* 에러 */}
           {status === "error" && (
             <div className="text-center py-10">
               <p className="text-red-400">
@@ -205,7 +157,6 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             </div>
           )}
 
-          {/* 성공 */}
           {status === "success" && data && (
             <div className="flex flex-col gap-2">
               {data.pages.map((page, pageIndex) => (
@@ -235,7 +186,6 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                 </div>
               ))}
 
-              {/* 검색 결과 없음 */}
               {isEmpty && (
                 <p className="text-center py-10 text-gray-500">
                   검색 결과가 없습니다.
@@ -244,7 +194,6 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             </div>
           )}
 
-          {/* 더보기 버튼 */}
           {hasNextPage && (
             <button
               onClick={() => fetchNextPage()}
