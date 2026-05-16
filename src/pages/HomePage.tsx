@@ -16,7 +16,7 @@ const HomePage = () => {
     isPending,
     fetchNextPage,
     isError,
-  } = useGetInfiniteLpList(10, search, PAGINATION_ORDER.desc);
+  } = useGetInfiniteLpList(10, search, PAGINATION_ORDER.asc);
 
   // ref, inView
   // ref -> 특정한 HTML 요소를 감시할 수 있다.
