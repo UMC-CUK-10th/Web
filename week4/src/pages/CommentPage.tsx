@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import CommentCard from "../components/LpCard/CommentCard";
 import CommentSkeletonList from "../components/LpCard/CommentSkeletonList";
 import useGetInfiniteComment from "../hooks/queries/useGetInfiniteComment";
+import usePostComment from "../hooks/mutations/usePostComment";
 import type { PaginationDto } from "../types/common";
+import type { CommentItem } from "../types/comment";
+import { getMyInfo } from "../apis/auth";
+import { QUERY_KEY } from "../constants/key";
+import { useAuth } from "../context/AuthContext";
 
 const CommentPage = () => {
   const navigate = useNavigate();
   const { lpid } = useParams();
+  const { accessToken } = useAuth();
+
   const [order, setOrder] = useState<PaginationDto["order"]>("desc");
   const [comment, setComment] = useState("");
 
@@ -22,6 +30,17 @@ const CommentPage = () => {
     fetchNextPage: commentsFetchNextPage,
   } = useGetInfiniteComment(numericLpId, 10, order);
 
+  const { data: myInfo } = useQuery({
+    queryKey: [QUERY_KEY.myInfo],
+    queryFn: getMyInfo,
+    enabled: Boolean(accessToken),
+  });
+
+  const currentUserId = myInfo?.data?.id;
+
+  const { mutate: postCommentMutate, isPending: isPosting } =
+    usePostComment(numericLpId ?? 0);
+
   const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
@@ -30,10 +49,25 @@ const CommentPage = () => {
     }
   }, [inView, commentsFetching, commentsHasNextPage, commentsFetchNextPage]);
 
-  const commentList =
+  const commentList: CommentItem[] =
     comments?.pages.map((page) => page.data.data).flat() ?? [];
 
   const isCommentEmpty = comment.trim().length === 0;
+
+  const handleSubmitComment = () => {
+    if (!numericLpId) {
+      alert("LP 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    if (isCommentEmpty || isPosting) return;
+
+    postCommentMutate(comment.trim(), {
+      onSuccess: () => {
+        setComment("");
+      },
+    });
+  };
 
   return (
     <div className="w-full bg-white text-gray-800">
@@ -89,20 +123,26 @@ const CommentPage = () => {
             type="text"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmitComment();
+              }
+            }}
             placeholder="댓글을 작성해주세요..."
             className="h-11 flex-1 rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
           />
 
           <button
             type="button"
-            disabled={isCommentEmpty}
+            onClick={handleSubmitComment}
+            disabled={isCommentEmpty || isPosting}
             className={`h-11 rounded-xl px-5 text-sm font-semibold transition ${
-              isCommentEmpty
+              isCommentEmpty || isPosting
                 ? "cursor-not-allowed bg-gray-200 text-gray-400"
                 : "bg-pink-500 text-white hover:bg-pink-600"
             }`}
           >
-            작성
+            {isPosting ? "작성 중..." : "작성"}
           </button>
         </div>
 
@@ -122,12 +162,14 @@ const CommentPage = () => {
 
         {!commentsLoading && commentList.length > 0 && (
           <div className="flex flex-col gap-4">
-            {commentList.map((comment) => (
+            {commentList.map((commentItem) => (
               <CommentCard
-                key={comment.id}
-                id={comment.id}
-                content={comment.content}
-                author={comment.author}
+                key={commentItem.id}
+                id={commentItem.id}
+                content={commentItem.content}
+                author={commentItem.author}
+                lpId={numericLpId ?? 0}
+                currentUserId={currentUserId}
               />
             ))}
 
