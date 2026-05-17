@@ -45,6 +45,7 @@ export interface RefreshResponse {
     accessToken: string;
     refreshToken: string;
   };
+<<<<<<< HEAD
 }
 
 export type PatchMyInfoDto = {
@@ -52,3 +53,6 @@ export type PatchMyInfoDto = {
   bio?: string;
   avatar?: string;
 };
+=======
+}
+>>>>>>> upstream/체컵/고원준
