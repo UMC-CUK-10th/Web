@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router-dom';
 import './App.css'
 import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
@@ -7,12 +7,15 @@ import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
 import { AuthProvider } from './context/AuthContext';
+import ProtectedLayout from './layouts/ProtectedLayout';
 
 //1.홈페이지
 //2.로그인 페이지
 //3.회원가입 페이지
 
-const router = createBrowserRouter([
+
+//publicRoutes: 인증없이 접근 가능한 페이지들 /login, /signup
+const publicRoutes:RouteObject[] = [
   {
     path: '/',
     element: <HomeLayout />,
@@ -21,10 +24,26 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage/> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
-      { path: 'my', element: <MyPage /> },
     ],
   },
-])
+];
+
+//protectedRoutes: 인증이 필요한 페이지들 /my
+const protectedRoutes:RouteObject[] = [
+  {
+    path: '/',
+    element: <ProtectedLayout />, //인증이 필요한 페이지들을 감싸주는 레이아웃
+    errorElement: <NotFoundPage />,
+    children: [
+      { 
+        path: 'my',
+        element: <MyPage />
+      },
+    ],
+  },
+]; 
+
+const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
 function App() {
   return (

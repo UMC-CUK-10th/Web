@@ -1,7 +1,6 @@
 
 import type { RequestSigninDto } from "../types/auth";
-import { createContext } from "react-router-dom";
-import { useContext, useState, type PropsWithChildren } from "react";
+import { createContext, useContext, useState, type PropsWithChildren } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { postSignin, postSignout} from "../apis/auth";
@@ -55,10 +54,14 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                setAccessToken(newAccessToken); //새로 발급된 토큰으로 상태 업데이트 시켜줘야함. 지연초기화니까
                setRefreshToken(newRefreshToken);
                alert("로그인 성공");
+               console.log(data);
           }
         } catch (error) {
             console.error("로그인 오류", error);
             alert("로그인 실패"); 
+            console.log(error);
+            
+            throw error;
         }
     };
 
@@ -75,6 +78,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         } catch (error) {
             console.error("로그아웃 오류", error);
             alert("로그아웃 실패");
+
         }
     };
 
