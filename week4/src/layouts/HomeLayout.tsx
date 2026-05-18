@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { deleteMyAccount, getMyInfo, postLogout } from "../apis/auth";
 import LpCreateModal from "../components/LpCreateModal";
@@ -7,6 +7,48 @@ import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const USER_NAME_UPDATED_EVENT = "user-name-updated";
+
+type HomeLayoutUiState = {
+  isSidebarOpen: boolean;
+  isLpCreateModalOpen: boolean;
+  isWithdrawModalOpen: boolean;
+};
+
+type HomeLayoutUiAction =
+  | { type: "toggleSidebar" }
+  | { type: "closeSidebar" }
+  | { type: "openLpCreateModal" }
+  | { type: "closeLpCreateModal" }
+  | { type: "openWithdrawModal" }
+  | { type: "closeWithdrawModal" };
+
+const initialHomeLayoutUiState: HomeLayoutUiState = {
+  isSidebarOpen: false,
+  isLpCreateModalOpen: false,
+  isWithdrawModalOpen: false,
+};
+
+const homeLayoutUiReducer = (
+  state: HomeLayoutUiState,
+  action: HomeLayoutUiAction
+): HomeLayoutUiState => {
+  switch (action.type) {
+    case "toggleSidebar":
+      return { ...state, isSidebarOpen: !state.isSidebarOpen };
+    case "closeSidebar":
+      return { ...state, isSidebarOpen: false };
+    case "openLpCreateModal":
+      return { ...state, isLpCreateModalOpen: true };
+    case "closeLpCreateModal":
+      return { ...state, isLpCreateModalOpen: false };
+    case "openWithdrawModal":
+      return { ...state, isWithdrawModalOpen: true };
+    case "closeWithdrawModal":
+      return { ...state, isWithdrawModalOpen: false };
+    default:
+      return state;
+  }
+};
 
 const HomeLayout = () => {
   const navigate = useNavigate();
@@ -19,20 +61,18 @@ const HomeLayout = () => {
   const { removeItem: removeRefreshToken } = useLocalStorage(
     LOCAL_STORAGE_KEY.refreshToken
   );
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getAccessToken());
-  const [userName, setCurrentUserName] = useState<string>(() => getUserName() ?? "");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLpCreateModalOpen, setIsLpCreateModalOpen] = useState(false);
-  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [storedUserName, setStoredUserName] = useState<string>(() => getUserName() ?? "");
+  const [uiState, dispatchUi] = useReducer(
+    homeLayoutUiReducer,
+    initialHomeLayoutUiState
+  );
   const [authActionError, setAuthActionError] = useState("");
+  const accessToken = getAccessToken();
+  const isLoggedIn = !!accessToken;
+  const userName = storedUserName;
+  const { isSidebarOpen, isLpCreateModalOpen, isWithdrawModalOpen } = uiState;
 
   useEffect(() => {
-    const accessToken = getAccessToken();
-    const storedUserName = getUserName();
-
-    setIsLoggedIn(!!accessToken);
-    setCurrentUserName(storedUserName ?? "");
-
     if (!accessToken || storedUserName) {
       return;
     }
@@ -41,23 +81,23 @@ const HomeLayout = () => {
       try {
         const response = await getMyInfo();
         setUserName(response.data.name);
-        setCurrentUserName(response.data.name);
+        setStoredUserName(response.data.name);
       } catch (error) {
         console.error(error);
       }
     };
 
     syncUserName();
-  }, [getAccessToken, getUserName, location.pathname, setUserName]);
+  }, [accessToken, location.pathname, setUserName, storedUserName]);
 
   useEffect(() => {
-    setIsSidebarOpen(false);
+    dispatchUi({ type: "closeSidebar" });
   }, [location.pathname]);
 
   useEffect(() => {
     const handleUserNameUpdated = (event: Event) => {
       const customEvent = event as CustomEvent<{ name?: string }>;
-      setCurrentUserName(customEvent.detail?.name ?? "");
+      setStoredUserName(customEvent.detail?.name ?? "");
     };
 
     window.addEventListener(USER_NAME_UPDATED_EVENT, handleUserNameUpdated);
@@ -71,8 +111,7 @@ const HomeLayout = () => {
     removeAccessToken();
     removeRefreshToken();
     removeUserName();
-    setIsLoggedIn(false);
-    setCurrentUserName("");
+    setStoredUserName("");
   };
 
   const logoutMutation = useMutation({
@@ -93,7 +132,7 @@ const HomeLayout = () => {
     mutationFn: deleteMyAccount,
     onSuccess: () => {
       clearAuthState();
-      setIsWithdrawModalOpen(false);
+      dispatchUi({ type: "closeWithdrawModal" });
       setAuthActionError("");
       navigate("/login", { replace: true });
     },
@@ -128,7 +167,7 @@ const HomeLayout = () => {
               type="button"
               aria-label="사이드바 열기"
               aria-expanded={isSidebarOpen}
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
+              onClick={() => dispatchUi({ type: "toggleSidebar" })}
               className="rounded-2xl border border-rose-200 bg-white/80 p-2 text-rose-700 transition-colors hover:border-rose-400 hover:text-rose-600 lg:hidden"
             >
               <svg
@@ -218,7 +257,7 @@ const HomeLayout = () => {
         <button
           type="button"
           aria-label="사이드바 닫기"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() => dispatchUi({ type: "closeSidebar" })}
           className="fixed inset-0 z-40 bg-rose-950/30 lg:hidden"
         />
       )}
@@ -235,7 +274,7 @@ const HomeLayout = () => {
             </p>
             <button
               type="button"
-              onClick={() => setIsSidebarOpen(false)}
+              onClick={() => dispatchUi({ type: "closeSidebar" })}
               className="rounded-full p-2 text-rose-600 transition-colors hover:bg-rose-100"
               aria-label="메뉴 닫기"
             >
@@ -259,7 +298,7 @@ const HomeLayout = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setIsWithdrawModalOpen(true);
+                      dispatchUi({ type: "openWithdrawModal" });
                       setAuthActionError("");
                     }}
                     className="rounded-2xl px-4 py-3 text-left text-sm font-semibold text-red-500 transition-colors hover:bg-rose-50"
@@ -291,7 +330,7 @@ const HomeLayout = () => {
         aria-label={isLoggedIn ? "LP 글 작성 모달 열기" : "회원가입 페이지로 이동"}
         onClick={() => {
           if (isLoggedIn) {
-            setIsLpCreateModalOpen(true);
+            dispatchUi({ type: "openLpCreateModal" });
             return;
           }
 
@@ -304,7 +343,7 @@ const HomeLayout = () => {
 
       <LpCreateModal
         isOpen={isLpCreateModalOpen}
-        onClose={() => setIsLpCreateModalOpen(false)}
+        onClose={() => dispatchUi({ type: "closeLpCreateModal" })}
       />
 
       {isWithdrawModalOpen && (
@@ -321,7 +360,7 @@ const HomeLayout = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setIsWithdrawModalOpen(false);
+                  dispatchUi({ type: "closeWithdrawModal" });
                   setAuthActionError("");
                 }}
                 className="flex-1 rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-50"

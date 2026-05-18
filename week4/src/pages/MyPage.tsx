@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useReducer, useState, type ChangeEvent } from "react";
 import { getMyInfo, patchMyInfo, uploadProfileImage } from "../apis/auth";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { useLocalStorage } from "../hooks/useLocalStorage";
@@ -8,15 +8,60 @@ import { type ResponseMyInfoDto } from "../types/auth";
 
 const USER_NAME_UPDATED_EVENT = "user-name-updated";
 
+type ProfileFormState = {
+  name: string;
+  bio: string;
+  avatarFile: File | null;
+  avatarPreview: string;
+};
+
+type ProfileFormAction =
+  | { type: "reset"; payload: ProfileFormState }
+  | { type: "setName"; payload: string }
+  | { type: "setBio"; payload: string }
+  | { type: "setAvatar"; payload: { avatarFile: File | null; avatarPreview: string } };
+
+const createProfileFormState = (
+  profile: ResponseMyInfoDto | null
+): ProfileFormState => ({
+  name: profile?.data.name ?? "",
+  bio: profile?.data.bio ?? "",
+  avatarFile: null,
+  avatarPreview: profile?.data.avatar ?? "",
+});
+
+const profileFormReducer = (
+  state: ProfileFormState,
+  action: ProfileFormAction
+): ProfileFormState => {
+  switch (action.type) {
+    case "reset":
+      return action.payload;
+    case "setName":
+      return { ...state, name: action.payload };
+    case "setBio":
+      return { ...state, bio: action.payload };
+    case "setAvatar":
+      return {
+        ...state,
+        avatarFile: action.payload.avatarFile,
+        avatarPreview: action.payload.avatarPreview,
+      };
+    default:
+      return state;
+  }
+};
+
 const MyPage = () => {
   const [data, setData] = useState<ResponseMyInfoDto | null>(null);
   const [isSettingOpen, setIsSettingOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
   const [submitError, setSubmitError] = useState("");
   const { setItem: setUserName } = useLocalStorage(LOCAL_STORAGE_KEY.userName);
+  const [formState, dispatchForm] = useReducer(
+    profileFormReducer,
+    createProfileFormState(null)
+  );
+  const { name, bio, avatarFile, avatarPreview } = formState;
 
   useEffect(() => {
     const getData = async () => {
@@ -32,10 +77,7 @@ const MyPage = () => {
       return;
     }
 
-    setName(data.data.name);
-    setBio(data.data.bio ?? "");
-    setAvatarPreview(data.data.avatar ?? "");
-    setAvatarFile(null);
+    dispatchForm({ type: "reset", payload: createProfileFormState(data) });
   }, [data]);
 
   const updateProfileMutation = useMutation({
@@ -113,15 +155,23 @@ const MyPage = () => {
 
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
-    setAvatarFile(file);
 
     if (!file) {
-      setAvatarPreview(data?.data.avatar ?? "");
+      dispatchForm({
+        type: "setAvatar",
+        payload: {
+          avatarFile: null,
+          avatarPreview: data?.data.avatar ?? "",
+        },
+      });
       return;
     }
 
     const previewUrl = URL.createObjectURL(file);
-    setAvatarPreview(previewUrl);
+    dispatchForm({
+      type: "setAvatar",
+      payload: { avatarFile: file, avatarPreview: previewUrl },
+    });
   };
 
   return (
@@ -237,7 +287,9 @@ const MyPage = () => {
               <input
                 type="text"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) =>
+                  dispatchForm({ type: "setName", payload: event.target.value })
+                }
                 className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 focus:outline-none focus:ring-2 focus:ring-rose-300"
               />
             </label>
@@ -248,7 +300,9 @@ const MyPage = () => {
               </span>
               <textarea
                 value={bio}
-                onChange={(event) => setBio(event.target.value)}
+                onChange={(event) =>
+                  dispatchForm({ type: "setBio", payload: event.target.value })
+                }
                 rows={4}
                 placeholder="자기소개를 입력해주세요"
                 className="w-full resize-none rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 placeholder:text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
@@ -263,10 +317,10 @@ const MyPage = () => {
                 onClick={() => {
                   setIsSettingOpen(false);
                   setSubmitError("");
-                  setName(data?.data.name ?? "");
-                  setBio(data?.data.bio ?? "");
-                  setAvatarPreview(data?.data.avatar ?? "");
-                  setAvatarFile(null);
+                  dispatchForm({
+                    type: "reset",
+                    payload: createProfileFormState(data),
+                  });
                 }}
                 className="rounded-2xl border border-rose-200 px-5 py-3 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-50"
               >
