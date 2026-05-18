@@ -1,15 +1,61 @@
 import { useMutation } from '@tanstack/react-query';
-import { postLike } from '../../apis/lp';
-import { queryClient } from '../../App';
 import { QUERY_KEY } from '../../constants/key';
+import { queryClient } from '../../App';
+import type { Likes, ResponseLpDto } from '../../types/lp';
+import type { ResponseMyInfoDto } from '../../types/auth';
+import { postLike } from '../../apis/lp';
 
 function usePostLike() {
   return useMutation({
     mutationFn: postLike,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.lps, data.data.lpId],
-        exact: true,
+    // onMutate -> API 요청 이전에 호출되는 친구
+    // UI에 바로 변경을 보여주기 위해 Cache 업데이트
+    onMutate: async (lp) => {
+      await queryClient.cancelQueries({
+        queryKey: [QUERY_KEY.lps, lp.lpId],
+      });
+
+      const previousLpPost = queryClient.getQueryData<ResponseLpDto>([
+        QUERY_KEY.lps,
+        lp.lpId,
+      ]);
+
+      const newLpPost = { ...previousLpPost };
+
+      const me = queryClient.getQueryData<ResponseMyInfoDto>([
+        QUERY_KEY.myInfo,
+      ]);
+      const userId = Number(me?.data.id);
+
+      const likedIndex =
+        previousLpPost?.data.likes.findIndex(
+          (like) => like.userId === userId,
+        ) ?? -1;
+
+      if (likedIndex >= 0) {
+        previousLpPost?.data.likes.splice(likedIndex, 1);
+      } else {
+        const newLike = { userId, lpId: lp.lpId } as Likes;
+        previousLpPost?.data.likes.push(newLike);
+      }
+      // 업데이트된 게시글 데이터를 캐시에 저장
+      // 이렇게하면 UI가 바로 업데이트 됨, 사용자가 변화를 확인할 수 있다.
+      queryClient.setQueryData([QUERY_KEY.lps, lp.lpId], newLpPost);
+
+      return { previousLpPost, newLpPost };
+    },
+    onError: (err, newLp, context) => {
+      console.log(err, newLp);
+      queryClient.setQueryData(
+        [QUERY_KEY.lps, newLp.lpId],
+        context?.previousLpPost?.data.id,
+      );
+    },
+
+    // onSettled는 API 요청이 끝난 후(성공하든 실패하든 실행)
+    onSettled: async (data, error, variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.lps, variables.lpId],
       });
     },
   });
