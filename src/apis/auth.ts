@@ -16,3 +16,8 @@ export const getMyInfo = async ():Promise<ResponseMyInfoDto> => {
     const { data } = await axiosInstance.get("/v1/users/me", {});
     return data;
 };
+
+export const postSignout = async ():Promise<void> => {
+    const {data} = await axiosInstance.post("/v1/auth/signout", {});
+    return data;
+};

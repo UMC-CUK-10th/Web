@@ -6,6 +6,7 @@ import HomeLayout from './layouts/HomeLayout';
 import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
+import { AuthProvider } from './context/AuthContext';
 
 //1.홈페이지
 //2.로그인 페이지
@@ -26,7 +27,12 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    //authProvider로 감싸줘야 로그인 상태를 앱 전체에서 사용할 수 있음. 로그인 상태는 context로 관리할거임. 로그인 했는지 안했는지, 토큰이 있는지 없는지 이런 정보들
+    <AuthProvider> 
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App
