@@ -1,13 +1,13 @@
+import ToggleBar from "../components/ToggleBar";
 
 export default function Home() {
     const items = ["🐹", "🌻", "🐹", "🍌", "🐹", "🍎", "🐹", "🌼"];
 
+
     return (
         <div className="flex justify-center items-center h-screen w-full">
             <div className="relative flex justify-center items-center w-40 h-40">
-                <h1 className="absolute text-xl font-black text-blue-600 z-10 whitespace-nowrap">
-                    김햄찌입니다
-                </h1>
+                <h1 className="absolute text-xl font-black text-blue-600 z-10 whitespace-nowrap">김햄찌의 영화 공간</h1>
                 
                 {/* 무한 회전: 타이틀에 집중하게 하는 요소*/}
                 <div className="relative w-40 h-40 animate-[spin_10s_linear_infinite]">
