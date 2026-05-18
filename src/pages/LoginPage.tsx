@@ -1,7 +1,25 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import useForm from "../hooks/useForm";
 import { validateSignin, type UserSigninInformation, } from "../utils/validate";
+import { useEffect, useRef } from "react";
 
 const LoginPage = () => {
+    const { login, accessToken } = useAuth();
+    const navigate = useNavigate();
+
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+
+            if (accessToken) {
+                navigate("/");
+            }
+        }
+    }, [accessToken, navigate]);
+
     const {values, errors, touched, getInputProps} = useForm<UserSigninInformation>({
         initialValue: {
             email: "",
@@ -10,8 +28,13 @@ const LoginPage = () => {
         validate: validateSignin,
     });
 
-    const handleSubmit = () => {
-        console.log(values);
+    const handleSubmit = async () => {
+        try {
+            await login(values);
+            navigate("/my"); //로그인 성공하면 마이페이지로 이동
+        } catch (error) {
+            console.error("로그인 실패", error);
+        }
     }
 
     //오류가 하나라도 있거나, 비어있으면 버튼 비활성화
