@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setItem: setAccessTokenInStorage,
     removeItem: removeAccessTokenFromStorage,
   } = useLocalStorage(LOCAL_STORAGE_KEY.accessToken);
+
   const {
     getItem: getRefreshTokenFromStorage,
     setItem: setRefreshTokenInStorage,
@@ -49,11 +50,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
       if (response) {
         const { accessToken, refreshToken, id } = response.data;
-
         localStorage.setItem('userId', String(id));
 
         setAccessTokenInStorage(accessToken);
         setRefreshTokenInStorage(refreshToken);
+
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
 
@@ -61,6 +62,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       }
     } catch (error) {
       console.error(error);
+
       alert('아이디 또는 비밀번호를 확인해주세요.');
     }
   };
@@ -75,6 +77,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
       removeAccessTokenFromStorage();
       removeRefreshTokenFromStorage();
+
       setAccessToken(null);
       setRefreshToken(null);
 
@@ -92,9 +95,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const useAuth = () => {
-  const context: AuthContextType = useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error('AuthContext를 찾을 수 없습니다.');
   }
+
   return context;
 };
