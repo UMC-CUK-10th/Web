@@ -17,6 +17,7 @@ import LpDetailPage from "./pages/LpDetailPage";
 import CommentPage from "./pages/CommentPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import ThrottlePage from "./pages/ThrottlePage";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -28,6 +29,7 @@ const publicRoutes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "v1/auth/google/callback", element: <GooglePage /> },
+      { path: "throttle", element: <ThrottlePage /> },
 
       {
         path: "lp/:lpid",
