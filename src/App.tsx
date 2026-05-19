@@ -2,6 +2,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   type RouteObject,
+  Outlet,
 } from 'react-router-dom';
 import './App.css';
 import HomePage from './pages/HomePage';
@@ -18,11 +19,25 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import LpDetailPage from './pages/LpDetailPage';
 import ThrottlePage from './pages/ThrottlePage';
 
-// 1. 홈페이지
-// 2. 로그인 페이지
-// 3. 회원가입 페이지
+import Navbar from './components/Navbar';
+import { Sidebar } from './components/Sidebar';
+import { useSidebar } from './hooks/useSidebar';
 
-// publicRoutes: 인증 없이 접근 가능한 라우트
+function AppLayout() {
+  const { isOpen, toggle, close } = useSidebar();
+
+  return (
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100'>
+      <Navbar isOpen={isOpen} onMenuClick={toggle} />
+      <Sidebar isOpen={isOpen} onClose={close} />
+      <main className='pt-16'>
+        {' '}
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
 const publicRoutes: RouteObject[] = [
   {
     path: '/',
@@ -39,7 +54,6 @@ const publicRoutes: RouteObject[] = [
   },
 ];
 
-// protectedRoutes: 인증이 필요한 라우트
 const protectedRoutes: RouteObject[] = [
   {
     path: '/',
@@ -53,7 +67,12 @@ const protectedRoutes: RouteObject[] = [
   },
 ];
 
-const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [...publicRoutes, ...protectedRoutes],
+  },
+]);
 
 export const queryClient = new QueryClient({
   defaultOptions: {

@@ -12,6 +12,7 @@ import { postLogout, postSignin } from '../apis/auth';
 interface AuthContextType {
   accessToken: string | null;
   refreshToken: string | null;
+  userName: string | null;
   login: (signInData: RequestSigninDto) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -19,6 +20,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   accessToken: null,
   refreshToken: null,
+  userName: null,
   login: async () => {},
   logout: async () => {},
 });
@@ -44,25 +46,30 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     getRefreshTokenFromStorage(),
   );
 
+  const [userName, setUserName] = useState<string | null>(
+    localStorage.getItem('userName'),
+  );
+
   const login = async (signinData: RequestSigninDto) => {
     try {
       const response = await postSignin(signinData);
 
       if (response) {
-        const { accessToken, refreshToken, id } = response.data;
-        localStorage.setItem('userId', String(id));
+        const { accessToken, refreshToken, id, name } = response.data;
 
+        localStorage.setItem('userId', String(id));
+        localStorage.setItem('userName', name);
         setAccessTokenInStorage(accessToken);
         setRefreshTokenInStorage(refreshToken);
 
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
+        setUserName(name);
 
         window.location.href = '/my';
       }
     } catch (error) {
       console.error(error);
-
       alert('아이디 또는 비밀번호를 확인해주세요.');
     }
   };
@@ -74,21 +81,24 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       console.error('서버 로그아웃 오류(무시하고 진행):', error);
     } finally {
       localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
 
       removeAccessTokenFromStorage();
       removeRefreshTokenFromStorage();
 
       setAccessToken(null);
       setRefreshToken(null);
+      setUserName(null);
 
       alert('로그아웃 되었습니다.');
-
       window.location.href = '/';
     }
   };
 
   return (
-    <AuthContext.Provider value={{ accessToken, refreshToken, login, logout }}>
+    <AuthContext.Provider
+      value={{ accessToken, refreshToken, userName, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -99,6 +109,5 @@ export const useAuth = () => {
   if (!context) {
     throw new Error('AuthContext를 찾을 수 없습니다.');
   }
-
   return context;
 };
