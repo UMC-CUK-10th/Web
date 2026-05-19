@@ -14,8 +14,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const { accessToken } = useAuth();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
-  const { mutate: deleteUserMutate, isPending: isDeleting } =
-    useDeleteUsers();
+  const { mutate: deleteUserMutate, isPending: isDeleting } = useDeleteUsers();
 
   const isLoggedIn =
     accessToken !== null &&
@@ -35,12 +34,15 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <>
-      {open && (
-        <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
-      )}
+      <div
+        className={`fixed inset-0 z-40 bg-black/20 transition-opacity duration-300 ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={onClose}
+      />
 
       <aside
-        className={`fixed left-0 top-0 z-50 h-full w-64 bg-white shadow-lg transition-transform duration-300 ${
+        className={`fixed left-0 top-0 z-50 h-full w-64 bg-white shadow-lg transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -74,6 +76,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             onClick={onClose}
           >
             검색
+          </Link>
+
+          <Link
+            to="/throttle"
+            className="rounded-lg px-3 py-2 text-gray-700 transition hover:bg-pink-50 hover:text-pink-500"
+            onClick={onClose}
+          >
+            Throttle 실습
           </Link>
         </nav>
 

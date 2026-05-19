@@ -4,12 +4,18 @@ import { useEffect, useState } from "react";
 import type { ResponseMyInfoDto } from "../types/auth";
 import { getMyInfo } from "../apis/auth";
 import Sidebar from "./Sidebar";
+import { useSidebar } from "../hooks/queries/useSidebar";
 
 export default function Navbar() {
   const { accessToken, logout } = useAuth();
   const [data, setData] = useState<ResponseMyInfoDto | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+
+  const {
+    isOpen: sidebarOpen,
+    open: openSidebar,
+    close: closeSidebar,
+  } = useSidebar();
 
   const isLoggedIn =
     accessToken !== null &&
@@ -46,7 +52,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <button
             type="button"
-            onClick={() => setSidebarOpen(true)}
+            onClick={openSidebar}
             aria-label="메뉴 열기"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-900 transition hover:bg-gray-100"
           >
@@ -79,7 +85,9 @@ export default function Navbar() {
         {isLoggedIn ? (
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium text-gray-700">
-              {data?.data?.name ? `${data.data.name}님 환영합니다` : "환영합니다"}
+              {data?.data?.name
+                ? `${data.data.name}님 환영합니다`
+                : "환영합니다"}
             </span>
 
             <button
@@ -109,7 +117,7 @@ export default function Navbar() {
         )}
       </div>
 
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar open={sidebarOpen} onClose={closeSidebar} />
     </nav>
   );
 }
