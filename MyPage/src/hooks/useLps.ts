@@ -7,7 +7,7 @@ export function useLps(enabled = true) {
         queryFn: ({ pageParam }) => lpRepository.getList(pageParam),
         initialPageParam: 0,
         getNextPageParam: (lastPage) => {
-            lastPage.hasNext ? lastPage.nextCursor : undefined
+            return lastPage.hasNext ? lastPage.nextCursor : undefined
         },
         enabled
     });
