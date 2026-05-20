@@ -6,7 +6,7 @@ import GoogleCallback from "./pages/auth/GoogleCallback";
 import Login from "./pages/auth/Login";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import LpDetail from "./pages/home/LpDetail";
+import LpDetail from "./pages/home/LpDetailView";
 import Mypage from "./pages/Mypage";
 
 function AppContent() {

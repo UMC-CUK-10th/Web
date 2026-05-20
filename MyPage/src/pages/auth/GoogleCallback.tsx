@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import authRepository from "../../repositories/authRepository";
 
 export default function GoogleCallback() {
     const navigate = useNavigate();
@@ -11,8 +12,7 @@ export default function GoogleCallback() {
         const refreshToken = params.get("refreshToken");
 
         if (accessToken && refreshToken) {
-            localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken); // 리프레시 토큰도 저장!
+            authRepository.saveTokens(accessToken, refreshToken);
             
             window.location.href = "/";
         } else {

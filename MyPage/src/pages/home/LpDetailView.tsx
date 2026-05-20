@@ -1,24 +1,13 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { fetchLpDetail } from "../../hooks/fetchLpDetail";
+import { useLp } from "../../hooks/useLp";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useState } from "react";
 import LpCommentsModal from "./LpCommentsModal";
 import LpLikeButton from "../../components/Lp/LpLikeButton";
 
-// sd
-
-export default function LpDetail() {
+export default function LpDetailView() {
     const { id } = useParams();
-
-    const { data, isLoading, isError } = useQuery({ 
-        queryKey: ["lp", Number(id)], 
-        queryFn: () => {
-            if (!id) throw new Error("ID가 없습니다.");
-            return fetchLpDetail(Number(id));
-        },
-        enabled: !!id,
-    });
+    const { data, isLoading, isError } = useLp(id);
 
     const [isOpenCommentModal, setIsOpenCommentModal] = useState(false);
 

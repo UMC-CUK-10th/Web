@@ -1,8 +1,6 @@
+import authRepository from "../repositories/authRepository";
+
 export default function GoogleLoginButton() {
-    const handleGoogleLogin = () => {
-        const url = "http://localhost:8000/v1/auth/google/login"
-        window.location.href = url;
-    }
     return (
         <button className="
             flex items-center 
@@ -12,7 +10,7 @@ export default function GoogleLoginButton() {
             hover:bg-gray-50 hover:shadow-md
             active:bg-gray-100
             transition-all duration-200"
-            onClick={handleGoogleLogin}
+            onClick={authRepository.loginWithGoogle}
         >
             <span>Google 계정으로 로그인</span>
         </button>

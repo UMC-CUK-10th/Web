@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from "react";
+
 import type { Comment } from "../../types/Comment";
-import { fetchComments, createComment, updateComment, deleteComment } from "../../hooks/useComments";
+import { useCommentScroll } from "../../hooks/useCommentScroll";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useUserContext } from "../../context/UserContext";
-
-// tst
+import commentRepository from "../../repositories/commentRepository";
 
 interface LpCommentsModalProps {
     lpId: number;
@@ -19,23 +19,20 @@ export default function LpCommentsModal({ lpId, onClose }: LpCommentsModalProps)
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editInput, setEditInput] = useState("");
 
-    const { data, isLoading, isError } = useQuery({
-        queryKey: ["comments", lpId],
-        queryFn: () => fetchComments(lpId),
-    });
+    const { comments, isLoading, isError, isFetchingNextPage, bottomRef } = useCommentScroll(lpId);
 
     const { mutate: addComment, isPending } = useMutation({
-        mutationFn: (content: string) => createComment(lpId, content),
+        mutationFn: (content: string) => commentRepository.create(lpId, content),
         onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["comments", lpId] });
-        setInput("");
+            queryClient.invalidateQueries({ queryKey: ["comments", lpId] });
+            setInput("");
         },
         onError: (error) => alert(error.message),
     });
 
     const { mutate: editComment } = useMutation({
         mutationFn: ({ commentId, content }: { commentId: number; content: string }) =>
-            updateComment(lpId, commentId, content),
+            commentRepository.update(lpId, commentId, content),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", lpId] });
             setEditingId(null);
@@ -45,7 +42,7 @@ export default function LpCommentsModal({ lpId, onClose }: LpCommentsModalProps)
     });
 
     const { mutate: removeComment } = useMutation({
-        mutationFn: (commentId: number) => deleteComment(lpId, commentId),
+        mutationFn: (commentId: number) => commentRepository.delete(lpId, commentId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", lpId] });
         },
@@ -86,9 +83,9 @@ export default function LpCommentsModal({ lpId, onClose }: LpCommentsModalProps)
                 <div className="flex flex-col gap-3 max-h-64 overflow-y-auto">
                     {isLoading && <LoadingSpinner title="댓글을 불러오는 중..."/>}
                     {isError && <p className="text-sm text-red-400">댓글을 불러오지 못했습니다.</p>}
-                    {data?.data.map((comment: Comment) => (
-                        <div className="flex justify-between">
-                            <div key={comment.id} className="flex flex-col gap-1">
+                    {comments.map((comment: Comment) => (
+                        <div key={comment.id} className="flex justify-between">
+                            <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium">{comment.author.name}</span>
                                     <span className="text-xs text-gray-400">
@@ -142,9 +139,11 @@ export default function LpCommentsModal({ lpId, onClose }: LpCommentsModalProps)
                             )}
                         </div>
                     ))}
-                    {data?.data.length === 0 && (
+                    { !isLoading && comments.length === 0 && (
                         <p className="text-sm text-gray-400">아직 댓글이 없어요.</p>
                     )}
+                    <div ref={bottomRef} />
+                    { isFetchingNextPage && <LoadingSpinner title="댓글을 불러오는 중..."/> }
                 </div>
 
                 {/* 댓글 입력 */}

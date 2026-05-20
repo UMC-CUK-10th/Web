@@ -1,3 +1,5 @@
+import type { Author } from "./Lp";
+
 export interface Comment {
   id: number;
   content: string;
@@ -5,15 +7,7 @@ export interface Comment {
   authorId: number;
   createdAt: string;
   updatedAt: string;
-  author: {
-    id: number;
-    name: string;
-    email: string;
-    bio: string | null;
-    avatar: string | null;
-    createdAt: string;
-    updatedAt: string;
-  };
+  author: Author;
 }
 
 export interface CommentListResponse {

@@ -1,11 +1,12 @@
 // components/LikeButton.tsx
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { InfiniteData } from "@tanstack/react-query";
 import { addLike, deleteLike } from "../../hooks/LpLike";
 import { useUserContext } from "../../context/UserContext";
-import type { Lp, LpBase, LpListResponse, LpResponse } from "../../types/Lp";
+import type { Lp, LpDetail, LpListResponse } from "../../types/Lp";
 
 interface LpLikeButtonProps {
-  lp: LpBase;
+  lp: LpDetail;
 }
 
 export default function LpLikeButton({ lp }: LpLikeButtonProps) {
@@ -23,21 +24,24 @@ export default function LpLikeButton({ lp }: LpLikeButtonProps) {
 
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["lps"] });
-      const previousLps = queryClient.getQueryData<LpListResponse>(["lps"]);
+      const previousLps = queryClient.getQueryData<InfiniteData<LpListResponse>>(["lps"]);
 
-      queryClient.setQueryData<LpListResponse>(["lps"], (old) => {
+      queryClient.setQueryData<InfiniteData<LpListResponse>>(["lps"], (old) => {
         if (!old) return old;
         return {
           ...old,
-          data: old.data.map((item: Lp) =>
-            item.id !== lp.id ? item : { ...item, likes: updatedLikes }
-          ),
+          pages: old.pages.map((page) => ({
+            ...page,
+            data: page.data.map((item: Lp) => (
+              item.id !== lp.id ? item : { ...item, likes: updatedLikes }
+            ))
+          })),
         };
       });
 
       await queryClient.cancelQueries({ queryKey: ["lp", lp.id] });
-      const previousLp = queryClient.getQueryData<LpResponse>(["lp", lp.id]);
-      queryClient.setQueryData<LpResponse>(["lp", lp.id], (old) => {
+      const previousLp = queryClient.getQueryData<LpDetail>(["lp", lp.id]);
+      queryClient.setQueryData<LpDetail>(["lp", lp.id], (old) => {
         if (!old) return old;
         return { ...old, likes: updatedLikes };
       });
