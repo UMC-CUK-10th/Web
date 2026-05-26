@@ -1,4 +1,4 @@
-import type { CursorBasedResponse } from "./common";
+import type { CommonResponse, CursorBasedResponse } from "./common";
 
 export type Tag = {
   id: number;
@@ -61,6 +61,29 @@ export type Comment = {
     avatar: string | null;
     createdAt: Date;
     updatedAt: Date;
+  };
+};
+
+export type CreateLpsDto = {
+    title : string;
+    content : string;
+    thumbnail : string | null;
+    tags : string[];
+    published: boolean;
+};
+
+export type ResponseLpCreateDto = CommonResponse<Lp>;
+
+export type RequestLpDto = {
+  lpId: number;
+};
+
+export type UploadResponse = {
+  status: boolean;
+  message: string;
+  statusCode: number;
+  data: {
+    imageUrl: string;
   };
 };
 

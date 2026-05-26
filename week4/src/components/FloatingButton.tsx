@@ -1,14 +1,18 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+type FloatingButtonProps = {
+  onClick: () => void;
+};
 
-const FloatingButton = () => {
+const FloatingButton = ({ onClick }: FloatingButtonProps) => {
   return (
-    <button className='flex justify-center items-center text-3xl bg-gray-500 rounded-full size-14 fixed bottom-6 right-6'>
-      <Link to={'#'}>
-        <span>+</span>
-      </Link>
+    <button
+      type="button"
+      onClick={onClick}
+      className="fixed bottom-6 right-6 z-40 flex size-14 cursor-pointer items-center justify-center rounded-full bg-pink-500 text-3xl font-light text-white shadow-lg transition hover:bg-pink-600"
+      aria-label="LP 작성 모달 열기"
+    >
+      <span className="mb-1">+</span>
     </button>
-  )
-}
+  );
+};
 
-export default FloatingButton
+export default FloatingButton;

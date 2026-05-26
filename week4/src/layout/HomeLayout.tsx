@@ -1,22 +1,29 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import FloatingButton from "../components/FloatingButton";
+import LpAdd from "../components/LpAdd";
 
 function HomeLayout() {
-  const navigate = useNavigate();
+  const [isLpAddOpen, setIsLpAddOpen] = useState(false);
+
   return (
-    <div className="h-dvh flex flex-col">
+    <div className="flex h-dvh flex-col">
       <Navbar />
+
       <main className="mt-16 flex-1">
         <Outlet />
       </main>
+
       <Footer />
-      <button
-        onClick={() => navigate("#")}
-        className="text-2xl flex justify-center items-center cursor-pointer fixed bottom-6 right-6 bg-blue-600 text-white size-14 rounded-full"
-      >
-        <span className="mb-1">+</span>
-      </button>
+
+      <FloatingButton onClick={() => setIsLpAddOpen(true)} />
+
+      <LpAdd
+        isOpen={isLpAddOpen}
+        onClose={() => setIsLpAddOpen(false)}
+      />
     </div>
   );
 }
