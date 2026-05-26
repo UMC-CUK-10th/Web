@@ -1,15 +1,22 @@
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import useGetLpDetail from "../hooks/queries/useGetLpDetail";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { Heart, MessageCircle, Pencil, Trash2, Check, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import usePatchLps from "../hooks/mutations/usePatchLps";
 import useDeleteLps from "../hooks/mutations/useDeleteLps";
+import usePostLike from "../hooks/mutations/usePostLike";
+import useDeleteLike from "../hooks/mutations/useDeleteLike";
+import { getMyInfo } from "../apis/auth";
+import { QUERY_KEY } from "../constants/key";
+import { useAuth } from "../context/AuthContext";
 
 const LpDetailPage = () => {
   const { lpid } = useParams<{ lpid: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { accessToken } = useAuth();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [editTitle, setEditTitle] = useState("");
@@ -17,8 +24,28 @@ const LpDetailPage = () => {
 
   const { data, isPending, isError } = useGetLpDetail(lpid || "");
 
+  const { data: myInfo } = useQuery({
+    queryKey: [QUERY_KEY.myInfo],
+    queryFn: getMyInfo,
+    enabled: Boolean(accessToken),
+  });
+
   const { mutate: patchLpMutate, isPending: isPatching } = usePatchLps();
   const { mutate: deleteLpMutate, isPending: isDeleting } = useDeleteLps();
+
+  const lpId = data?.id ?? 0;
+  const currentUserId = myInfo?.data?.id;
+
+  const { mutate: postLikeMutate, isPending: isPostLikePending } = usePostLike({
+    lpId,
+    currentUserId,
+  });
+
+  const { mutate: deleteLikeMutate, isPending: isDeleteLikePending } =
+    useDeleteLike({
+      lpId,
+      currentUserId,
+    });
 
   useEffect(() => {
     if (data) {
@@ -46,8 +73,34 @@ const LpDetailPage = () => {
   const lp = data;
   const isCommentOpen = location.pathname.includes("/comments");
 
+  const isLiked = (lp.likes ?? []).some((like: any) => {
+    return (
+      like.userId === currentUserId ||
+      like.user?.id === currentUserId ||
+      like.id === currentUserId
+    );
+  });
+
+  const isLikePending = isPostLikePending || isDeleteLikePending;
+
   const handleComments = () => {
     navigate(`/lp/${lp.id}/comments`);
+  };
+
+  const handleLike = () => {
+    if (!accessToken) {
+      alert("로그인 후 이용해주세요.");
+      navigate("/login");
+      return;
+    }
+
+    if (isLikePending) return;
+
+    if (isLiked) {
+      deleteLikeMutate();
+    } else {
+      postLikeMutate();
+    }
   };
 
   const handleCancelEdit = () => {
@@ -69,7 +122,7 @@ const LpDetailPage = () => {
           title: editTitle.trim(),
           content: editContent.trim(),
           thumbnail: lp.thumbnail,
-          tags: lp.tags?.map((tag) => tag.name) ?? [],
+          tags: lp.tags?.map((tag: { name: string }) => tag.name) ?? [],
           published: true,
         },
       },
@@ -214,12 +267,25 @@ const LpDetailPage = () => {
           )}
 
           <div className="mt-6 flex justify-center">
-            <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-gray-600">
-              <Heart size={16} className="text-pink-500" />
+            <button
+              type="button"
+              onClick={handleLike}
+              disabled={isLikePending}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 transition ${
+                isLiked
+                  ? "border-pink-200 bg-pink-50 text-pink-500"
+                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              <Heart
+                size={16}
+                className={isLiked ? "text-pink-500" : "text-gray-500"}
+                fill={isLiked ? "currentColor" : "none"}
+              />
               <span className="text-sm font-medium">
                 {lp.likes?.length ?? 0}
               </span>
-            </div>
+            </button>
           </div>
         </section>
 
