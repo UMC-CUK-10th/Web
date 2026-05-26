@@ -23,6 +23,12 @@ export type RequestSigninDto = {
   password: string;
 };
 
+export type RequestUpdateUserDto = {
+  name?: string;
+  bio?: string;
+  avatar?: string;
+};
+
 export type ResponseSigninDto = CommonResponse<{
   id: number;
   name: string;

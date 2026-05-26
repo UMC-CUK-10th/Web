@@ -1,6 +1,7 @@
 import type {
   RequestSigninDto,
   RequestSignupDto,
+  RequestUpdateUserDto,
   ResponseMyInfoDto,
   ResponseSigninDto,
   ResponseSignupDto,
@@ -29,6 +30,35 @@ export const getMyInfo = async (): Promise<ResponseMyInfoDto> => {
 export const postLogout = async () => {
   const { data } = await axiosInstance.post("/v1/auth/signout");
   return data;
+};
+
+export const deleteMyAccount = async () => {
+  const { data } = await axiosInstance.delete("/v1/users");
+  return data;
+};
+
+export const patchMyInfo = async (
+  body: RequestUpdateUserDto
+): Promise<ResponseMyInfoDto> => {
+  const { data } = await axiosInstance.patch("/v1/users", body);
+  return data;
+};
+
+export const uploadProfileImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await axiosInstance.post<{ data: { imageUrl: string } }>(
+    "/v1/uploads",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return data.data.imageUrl;
 };
 
 export type { RequestSignupDto } from "../types/auth";

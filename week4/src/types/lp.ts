@@ -34,6 +34,10 @@ export type Lp = {
   likes: Likes[];
 };
 
+export type LpDetail = Lp & {
+  author: Authors;
+};
+
 export type Comment = {
   id: number;
   content: string;

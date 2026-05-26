@@ -1,4 +1,6 @@
 import { isAxiosError } from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { postSignin } from "../apis/auth";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
@@ -9,6 +11,7 @@ import { validateSignin, type UserSigninInformation } from "../utils/validate";
 export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [submitError, setSubmitError] = useState("");
   const redirectPath = location.state?.from?.pathname || "/";
   const { setItem: setAccessToken } = useLocalStorage(
     LOCAL_STORAGE_KEY.accessToken
@@ -27,25 +30,37 @@ export const LoginPage = () => {
       validate: validateSignin,
     });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await postSignin(values);
+  const loginMutation = useMutation({
+    mutationFn: postSignin,
+    onSuccess: (response) => {
       const { accessToken, refreshToken, name } = response.data;
 
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
       setUserName(name);
+      setSubmitError("");
 
       navigate(redirectPath, { replace: true });
-    } catch (error) {
+    },
+    onError: (error) => {
       if (isAxiosError(error)) {
-        console.error(error.response?.data?.message ?? "로그인에 실패했습니다.");
+        const message =
+          error.response?.data?.message ?? "로그인에 실패했습니다.";
+        setSubmitError(Array.isArray(message) ? message.join(", ") : String(message));
         return;
       }
 
-      console.error(error);
+      setSubmitError("로그인에 실패했습니다.");
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError("");
+    try {
+      await loginMutation.mutateAsync(values);
+    } catch {
+      return;
     }
   };
 
@@ -56,7 +71,8 @@ export const LoginPage = () => {
 
   const isDisabled =
     Object.values(error || {}).some((error) => !!error) ||
-    Object.values(values).some((value) => value === "");
+    Object.values(values).some((value) => value === "") ||
+    loginMutation.isPending;
 
   return (
     <div className="flex min-h-full w-full items-center justify-center bg-transparent text-gray-900">
@@ -116,8 +132,10 @@ export const LoginPage = () => {
             disabled={isDisabled}
             className="mt-4 w-full rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 py-3 font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            로그인
+            {loginMutation.isPending ? "로그인 중..." : "로그인"}
           </button>
+
+          {submitError && <p className="text-sm text-red-500">{submitError}</p>}
 
           <button
             type="button"
