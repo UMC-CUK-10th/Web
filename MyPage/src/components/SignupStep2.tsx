@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import type { SignupForm } from "../pages/Signup";
+
+// 비밀번호와 비밀번호 확인값이 일치하는지? -> validate 옵션으로 처리하기
 
 interface SignupStep2Props {
     onNext: (data: { password: string }) => void;
@@ -6,88 +9,58 @@ interface SignupStep2Props {
 }
 
 export default function SignupStep2({ onNext, onPrev }: SignupStep2Props) {
-    const [password, setPassword] = useState("");
-    const [passwordConfirm, setPasswordConfirm] = useState("");
-    const [errors, setErrors] = useState({ password: "", passwordConfirm: "" });
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: {errors, isValid}
+    } = useForm<SignupForm>({
+        mode: "onChange"
+    });
 
-    // 버튼 활성화 조건: 두 칸 모두 입력되었을 때
-    const isNotEmpty = password.trim() !== "" && passwordConfirm.trim() !== "";
+    const passwordValue = watch("password") // password 필드를 실시간으로 감시
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        if (name === "password") setPassword(value);
-        else setPasswordConfirm(value);
-
-        // 입력 시 해당 필드 에러 초기화
-        if (errors[name as keyof typeof errors]) {
-            setErrors((prev) => ({ ...prev, [name]: "" }));
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-
-        // 1. 기본 브라우저 유효성 검사 (minLength 등)
-        if (!form.checkValidity()) {
-            const newErrors = { password: "", passwordConfirm: "" };
-            Array.from(form.elements).forEach((el) => {
-                if (el instanceof HTMLInputElement && el.name) {
-                    if (!el.validity.valid) {
-                        newErrors[el.name as keyof typeof newErrors] = el.validationMessage;
-                    }
-                }
-            });
-            setErrors(newErrors);
-            return;
-        }
-
-        // 2. 커스텀 검사: 비밀번호 일치 여부
-        if (password !== passwordConfirm) {
-            setErrors((prev) => ({
-                ...prev,
-                passwordConfirm: "비밀번호가 일치하지 않습니다."
-            }));
-            return;
-        }
-
-        // ✅ 모든 검증 통과 시 최종 데이터 전달
-        onNext({ password });
-    };
+    const onSubmit = (data: any) => {
+        onNext({
+            password: data.password
+        });
+    }
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             {/* 비밀번호 입력 */}
             <div className="flex flex-col gap-1">
                 <input
-                    name="password"
+                    {...register("password", {
+                        required: "비밀번호는 필수입니다.",
+                        minLength: {
+                            value: 8,
+                            message: "비밀번호는 최소 8자 이상이어야 합니다."
+                        }
+                    })}
                     type="password"
                     placeholder="비밀번호 (8자 이상)"
                     className={`border p-2 rounded outline-none focus:ring-2 ${
                         errors.password ? "border-red-500 ring-red-100" : "border-gray-300 focus:ring-blue-100"
                     }`}
-                    value={password}
-                    onChange={handleChange}
-                    required
-                    minLength={8}
                 />
-                {errors.password && <p className="text-red-500 text-xs mt-1">⚠️ {errors.password}</p>}
+                {errors.password && <p className="text-red-500 text-xs mt-1">⚠️ {errors.password.message}</p>}
             </div>
 
             {/* 비밀번호 확인 입력 */}
             <div className="flex flex-col gap-1">
                 <input
-                    name="passwordConfirm"
+                    {...register("passwordConfirm", {
+                        required: "비밀번호는 확인이 필요합니다.",
+                        validate: (value) => value === passwordValue || "비밀번호가 일치하지 않습니다."
+                    })}
                     type="password"
                     placeholder="비밀번호 확인"
                     className={`border p-2 rounded outline-none focus:ring-2 ${
                         errors.passwordConfirm ? "border-red-500 ring-red-100" : "border-gray-300 focus:ring-blue-100"
                     }`}
-                    value={passwordConfirm}
-                    onChange={handleChange}
-                    required
                 />
-                {errors.passwordConfirm && <p className="text-red-500 text-xs mt-1">⚠️ {errors.passwordConfirm}</p>}
+                {errors.passwordConfirm && <p className="text-red-500 text-xs mt-1">⚠️ {errors.passwordConfirm.message}</p>}
             </div>
 
             <div className="flex gap-2 mt-2">
@@ -100,14 +73,14 @@ export default function SignupStep2({ onNext, onPrev }: SignupStep2Props) {
                 </button>
                 <button
                     type="submit"
-                    disabled={!isNotEmpty}
+                    disabled={!isValid}
                     className={`flex-1 p-2 rounded font-bold transition-all ${
-                        !isNotEmpty
+                        !isValid
                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                             : "bg-blue-500 text-white hover:bg-blue-600"
                     }`}
                 >
-                    회원가입 완료
+                    다음
                 </button>
             </div>
         </form>
