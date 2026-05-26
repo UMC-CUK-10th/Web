@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useReducer, type ChangeEvent } from "react";
 import { createLp, updateLp, uploadLpImage } from "../apis/lp";
 import { QUERY_KEY } from "../constants/key";
 import type { LpDetail } from "../types/lp";
@@ -13,6 +13,60 @@ interface Props {
   initialData?: LpDetail | null;
 }
 
+type LpFormState = {
+  title: string;
+  content: string;
+  tagInput: string;
+  tags: string[];
+  imageFile: File | null;
+  previewUrl: string;
+};
+
+type LpFormAction =
+  | { type: "reset"; payload: LpFormState }
+  | { type: "setTitle"; payload: string }
+  | { type: "setContent"; payload: string }
+  | { type: "setTagInput"; payload: string }
+  | { type: "setTags"; payload: string[] }
+  | { type: "setImage"; payload: { imageFile: File | null; previewUrl: string } };
+
+const createInitialFormState = (
+  isEditMode: boolean,
+  initialData: LpDetail | null
+): LpFormState => ({
+  title: isEditMode && initialData ? initialData.title : "",
+  content: isEditMode && initialData ? initialData.content : "",
+  tagInput: "",
+  tags: isEditMode && initialData ? initialData.tags.map((tag) => tag.name) : [],
+  imageFile: null,
+  previewUrl: isEditMode && initialData ? initialData.thumbnail ?? "" : "",
+});
+
+const lpFormReducer = (state: LpFormState, action: LpFormAction): LpFormState => {
+  switch (action.type) {
+    case "reset":
+      return action.payload;
+    case "setTitle":
+      return { ...state, title: action.payload };
+    case "setContent":
+      return { ...state, content: action.payload };
+    case "setTagInput":
+      return { ...state, tagInput: action.payload };
+    case "setTags":
+      return { ...state, tags: action.payload };
+    case "setImage":
+      return {
+        ...state,
+        imageFile: action.payload.imageFile,
+        previewUrl: action.payload.previewUrl,
+      };
+    default:
+      return state;
+  }
+};
+
+const submitErrorReducer = (_state: string, action: string) => action;
+
 const LpCreateModal = ({
   isOpen,
   onClose,
@@ -21,15 +75,18 @@ const LpCreateModal = ({
   initialData = null,
 }: Props) => {
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tagInput, setTagInput] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [submitError, setSubmitError] = useState("");
+  const [submitError, dispatchSubmitError] = useReducer(submitErrorReducer, "");
 
   const isEditMode = mode === "edit";
+  const initialFormState = useMemo(
+    () => createInitialFormState(isEditMode, initialData),
+    [initialData, isEditMode]
+  );
+  const [formState, dispatch] = useReducer(
+    lpFormReducer,
+    initialFormState
+  );
+  const { title, content, tagInput, tags, imageFile, previewUrl } = formState;
 
   const invalidateLpQueries = async () => {
     await queryClient.invalidateQueries({
@@ -49,7 +106,7 @@ const LpCreateModal = ({
       onClose();
     },
     onError: () => {
-      setSubmitError("LP 생성에 실패했습니다. 입력값을 확인한 뒤 다시 시도해주세요.");
+      dispatchSubmitError("LP 생성에 실패했습니다. 입력값을 확인한 뒤 다시 시도해주세요.");
     },
   });
 
@@ -60,7 +117,7 @@ const LpCreateModal = ({
       onClose();
     },
     onError: () => {
-      setSubmitError("LP 수정에 실패했습니다. 입력값을 확인한 뒤 다시 시도해주세요.");
+      dispatchSubmitError("LP 수정에 실패했습니다. 입력값을 확인한 뒤 다시 시도해주세요.");
     },
   });
 
@@ -87,36 +144,12 @@ const LpCreateModal = ({
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (!isOpen) {
-      setTitle("");
-      setContent("");
-      setTagInput("");
-      setTags([]);
-      setImageFile(null);
-      setPreviewUrl("");
-      setSubmitError("");
-      return;
-    }
-
-    if (isEditMode && initialData) {
-      setTitle(initialData.title);
-      setContent(initialData.content);
-      setTags(initialData.tags.map((tag) => tag.name));
-      setPreviewUrl(initialData.thumbnail ?? "");
-      setImageFile(null);
-      setTagInput("");
-      setSubmitError("");
-      return;
-    }
-
-    setTitle("");
-    setContent("");
-    setTagInput("");
-    setTags([]);
-    setImageFile(null);
-    setPreviewUrl("");
-    setSubmitError("");
-  }, [initialData, isEditMode, isOpen]);
+    dispatch({
+      type: "reset",
+      payload: isOpen ? initialFormState : createInitialFormState(false, null),
+    });
+    dispatchSubmitError("");
+  }, [initialFormState, isOpen]);
 
   const handleAddTag = () => {
     const nextTag = tagInput.trim();
@@ -126,30 +159,41 @@ const LpCreateModal = ({
     }
 
     if (tags.includes(nextTag)) {
-      setTagInput("");
+      dispatch({ type: "setTagInput", payload: "" });
       return;
     }
 
-    setTags((prev) => [...prev, nextTag]);
-    setTagInput("");
+    dispatch({ type: "setTags", payload: [...tags, nextTag] });
+    dispatch({ type: "setTagInput", payload: "" });
   };
 
   const handleRemoveTag = (targetTag: string) => {
-    setTags((prev) => prev.filter((tag) => tag !== targetTag));
+    dispatch({
+      type: "setTags",
+      payload: tags.filter((tag) => tag !== targetTag),
+    });
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
-    setImageFile(file);
-    setSubmitError("");
+    dispatchSubmitError("");
 
     if (!file) {
-      setPreviewUrl(isEditMode ? initialData?.thumbnail ?? "" : "");
+      dispatch({
+        type: "setImage",
+        payload: {
+          imageFile: null,
+          previewUrl: isEditMode ? initialData?.thumbnail ?? "" : "",
+        },
+      });
       return;
     }
 
     const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    dispatch({
+      type: "setImage",
+      payload: { imageFile: file, previewUrl: objectUrl },
+    });
   };
 
   const isPending = createLpMutation.isPending || updateLpMutation.isPending;
@@ -200,7 +244,7 @@ const LpCreateModal = ({
           className="mt-8 space-y-5"
           onSubmit={async (event) => {
             event.preventDefault();
-            setSubmitError("");
+            dispatchSubmitError("");
 
             try {
               const thumbnail = imageFile
@@ -232,13 +276,13 @@ const LpCreateModal = ({
                   error.response?.data?.message ??
                   error.response?.data?.error ??
                   `LP ${isEditMode ? "수정" : "생성"}에 실패했습니다.`;
-                setSubmitError(
+                dispatchSubmitError(
                   Array.isArray(message) ? message.join(", ") : String(message)
                 );
                 return;
               }
 
-              setSubmitError(`LP ${isEditMode ? "수정" : "생성"}에 실패했습니다.`);
+              dispatchSubmitError(`LP ${isEditMode ? "수정" : "생성"}에 실패했습니다.`);
             }
           }}
         >
@@ -272,7 +316,9 @@ const LpCreateModal = ({
               type="text"
               placeholder="LP 제목을 입력해주세요"
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) =>
+                dispatch({ type: "setTitle", payload: event.target.value })
+              }
               className="w-full rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 placeholder:text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
             />
           </label>
@@ -282,7 +328,9 @@ const LpCreateModal = ({
             <textarea
               placeholder="LP와 관련된 감상이나 소개를 작성해주세요"
               value={content}
-              onChange={(event) => setContent(event.target.value)}
+              onChange={(event) =>
+                dispatch({ type: "setContent", payload: event.target.value })
+              }
               rows={6}
               className="w-full resize-none rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-rose-950 placeholder:text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
             />
@@ -296,7 +344,9 @@ const LpCreateModal = ({
                   type="text"
                   placeholder="태그를 입력해주세요"
                   value={tagInput}
-                  onChange={(event) => setTagInput(event.target.value)}
+                  onChange={(event) =>
+                    dispatch({ type: "setTagInput", payload: event.target.value })
+                  }
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.preventDefault();
