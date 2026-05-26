@@ -56,5 +56,8 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 !/prisma/dev.db
 
+<<<<<<< HEAD
+=======
 # 특정 폴더 제외
+>>>>>>> upstream/체컵/고원준
 UMC-8th-BE/

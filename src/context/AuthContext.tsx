@@ -1,21 +1,34 @@
 import { createContext, useContext, useState, type PropsWithChildren } from "react";
+<<<<<<< HEAD
+=======
 import type { RequestSigninDto } from "../types/auth";
 import { postLogout, postSignin } from "../apis/auth";
+>>>>>>> upstream/체컵/고원준
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 
 interface AuthContextType {
     accessToken: string | null;
     refreshToken: string | null;
+<<<<<<< HEAD
+    setAccessToken: (token: string | null) => void;
+    setRefreshToken: (token: string | null) => void;
+=======
     login: (signInData: RequestSigninDto) => Promise<void>;
     logout: () => Promise<void>;
+>>>>>>> upstream/체컵/고원준
 }
 
 export const AuthContext = createContext<AuthContextType>({
     accessToken: null,
     refreshToken: null,
+<<<<<<< HEAD
+    setAccessToken: () => {},
+    setRefreshToken: () => {},
+=======
     login: async () => {},
     logout: async () => {},
+>>>>>>> upstream/체컵/고원준
 });
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
@@ -31,6 +44,31 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         removeItem: removeRefreshTokenFromStorage,
     } = useLocalStorage(LOCAL_STORAGE_KEY.refreshToken);
 
+<<<<<<< HEAD
+    const [accessToken, setAccessTokenState] = useState<string | null>(() => getAccessTokenFromStorage());
+    const [refreshToken, setRefreshTokenState] = useState<string | null>(() => getRefreshTokenFromStorage());
+
+    const setAccessToken = (token: string | null) => {
+        if (token) {
+            setAccessTokenToStorage(token);
+        } else {
+            removeAccessTokenFromStorage();
+        }
+        setAccessTokenState(token);
+    };
+
+    const setRefreshToken = (token: string | null) => {
+        if (token) {
+            setRefreshTokenToStorage(token);
+        } else {
+            removeRefreshTokenFromStorage();
+        }
+        setRefreshTokenState(token);
+    };
+
+    return (
+        <AuthContext.Provider value={{ accessToken, refreshToken, setAccessToken, setRefreshToken }}>
+=======
     const [accessToken, setAccessToken] = useState<string | null>(() => getAccessTokenFromStorage());
     const [refreshToken, setRefreshToken] = useState<string | null>(() => getRefreshTokenFromStorage());
 
@@ -69,6 +107,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     return (
         <AuthContext.Provider value={{ accessToken, refreshToken, login, logout }}>
+>>>>>>> upstream/체컵/고원준
             {children}
         </AuthContext.Provider>
     );
