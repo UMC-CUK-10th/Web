@@ -5,25 +5,22 @@ import { deleteMyAccount, getMyInfo, postLogout } from "../apis/auth";
 import LpCreateModal from "../components/LpCreateModal";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import useSidebar from "../hooks/useSidebar";
 
 const USER_NAME_UPDATED_EVENT = "user-name-updated";
 
 type HomeLayoutUiState = {
-  isSidebarOpen: boolean;
   isLpCreateModalOpen: boolean;
   isWithdrawModalOpen: boolean;
 };
 
 type HomeLayoutUiAction =
-  | { type: "toggleSidebar" }
-  | { type: "closeSidebar" }
   | { type: "openLpCreateModal" }
   | { type: "closeLpCreateModal" }
   | { type: "openWithdrawModal" }
   | { type: "closeWithdrawModal" };
 
 const initialHomeLayoutUiState: HomeLayoutUiState = {
-  isSidebarOpen: false,
   isLpCreateModalOpen: false,
   isWithdrawModalOpen: false,
 };
@@ -33,10 +30,6 @@ const homeLayoutUiReducer = (
   action: HomeLayoutUiAction
 ): HomeLayoutUiState => {
   switch (action.type) {
-    case "toggleSidebar":
-      return { ...state, isSidebarOpen: !state.isSidebarOpen };
-    case "closeSidebar":
-      return { ...state, isSidebarOpen: false };
     case "openLpCreateModal":
       return { ...state, isLpCreateModalOpen: true };
     case "closeLpCreateModal":
@@ -66,11 +59,16 @@ const HomeLayout = () => {
     homeLayoutUiReducer,
     initialHomeLayoutUiState
   );
+  const {
+    isOpen: isSidebarOpen,
+    close: closeSidebar,
+    toggle: toggleSidebar,
+  } = useSidebar();
   const [authActionError, setAuthActionError] = useState("");
   const accessToken = getAccessToken();
   const isLoggedIn = !!accessToken;
   const userName = storedUserName;
-  const { isSidebarOpen, isLpCreateModalOpen, isWithdrawModalOpen } = uiState;
+  const { isLpCreateModalOpen, isWithdrawModalOpen } = uiState;
 
   useEffect(() => {
     if (!accessToken || storedUserName) {
@@ -91,8 +89,44 @@ const HomeLayout = () => {
   }, [accessToken, location.pathname, setUserName, storedUserName]);
 
   useEffect(() => {
-    dispatchUi({ type: "closeSidebar" });
-  }, [location.pathname]);
+    closeSidebar();
+  }, [closeSidebar, location.pathname]);
+
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeSidebar();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [closeSidebar, isSidebarOpen]);
+
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      return;
+    }
+
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = documentElement.style.overflow;
+
+    body.style.overflow = "hidden";
+    documentElement.style.overflow = "hidden";
+
+    return () => {
+      body.style.overflow = previousBodyOverflow;
+      documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     const handleUserNameUpdated = (event: Event) => {
@@ -154,6 +188,45 @@ const HomeLayout = () => {
         : "text-rose-900/70 hover:bg-rose-50 hover:text-rose-700"
     }`;
 
+  const sidebarContent = (
+    <div className="space-y-2">
+      <p className="text-xs font-bold uppercase tracking-[0.3em] text-rose-400">
+        Navigation
+      </p>
+      <nav className="mt-4 flex flex-col gap-2">
+        <NavLink to="/" end className={sidebarLinkClass}>
+          홈
+        </NavLink>
+        {isLoggedIn ? (
+          <>
+            <NavLink to="/mypage" className={sidebarLinkClass}>
+              마이페이지
+            </NavLink>
+            <button
+              type="button"
+              onClick={() => {
+                dispatchUi({ type: "openWithdrawModal" });
+                setAuthActionError("");
+              }}
+              className="rounded-2xl px-4 py-3 text-left text-sm font-semibold text-red-500 transition-colors hover:bg-rose-50"
+            >
+              탈퇴하기
+            </button>
+          </>
+        ) : (
+          <>
+            <NavLink to="/login" className={sidebarLinkClass}>
+              로그인
+            </NavLink>
+            <NavLink to="/signup" className={sidebarLinkClass}>
+              회원가입
+            </NavLink>
+          </>
+        )}
+      </nav>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-100 text-gray-900">
       <header className="border-b border-rose-200/70 bg-white/70 backdrop-blur">
@@ -165,10 +238,10 @@ const HomeLayout = () => {
 
             <button
               type="button"
-              aria-label="사이드바 열기"
+              aria-label={isSidebarOpen ? "사이드바 닫기" : "사이드바 열기"}
               aria-expanded={isSidebarOpen}
-              onClick={() => dispatchUi({ type: "toggleSidebar" })}
-              className="rounded-2xl border border-rose-200 bg-white/80 p-2 text-rose-700 transition-colors hover:border-rose-400 hover:text-rose-600 lg:hidden"
+              onClick={toggleSidebar}
+              className="ml-2 rounded-2xl border border-rose-200 bg-white/80 p-2 text-rose-700 transition-colors hover:border-rose-400 hover:text-rose-600"
             >
               <svg
                 width="48"
@@ -253,19 +326,29 @@ const HomeLayout = () => {
         </div>
       </header>
 
-      {isSidebarOpen && (
-        <button
-          type="button"
-          aria-label="사이드바 닫기"
-          onClick={() => dispatchUi({ type: "closeSidebar" })}
-          className="fixed inset-0 z-40 bg-rose-950/30 lg:hidden"
-        />
-      )}
+      <button
+        type="button"
+        aria-label="사이드바 닫기"
+        onClick={closeSidebar}
+        className={`fixed inset-0 z-40 bg-rose-950/30 transition-opacity duration-300 lg:hidden ${
+          isSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
 
       <div className="mx-auto flex min-h-[calc(100vh-89px)] w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:py-10">
+        <div
+          className={`hidden overflow-hidden transition-all duration-300 ease-out lg:block ${
+            isSidebarOpen ? "lg:w-64 lg:opacity-100" : "lg:w-0 lg:opacity-0"
+          }`}
+        >
+          <aside className="h-full w-64 rounded-[32px] bg-white/70 p-5 shadow-lg ring-1 ring-rose-200 backdrop-blur">
+            {sidebarContent}
+          </aside>
+        </div>
+
         <aside
-          className={`fixed top-0 left-0 z-50 flex h-full w-72 flex-col rounded-r-[32px] bg-white/95 p-6 shadow-2xl ring-1 ring-rose-200 backdrop-blur transition-transform duration-300 lg:static lg:h-auto lg:w-64 lg:translate-x-0 lg:rounded-[32px] lg:bg-white/70 lg:p-5 lg:shadow-lg ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed top-0 left-0 z-50 flex h-full w-72 flex-col rounded-r-[32px] bg-white/95 p-6 shadow-2xl ring-1 ring-rose-200 backdrop-blur transition-all duration-300 ease-out lg:hidden ${
+            isSidebarOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
           }`}
         >
           <div className="mb-4 flex items-center justify-between lg:hidden">
@@ -274,7 +357,7 @@ const HomeLayout = () => {
             </p>
             <button
               type="button"
-              onClick={() => dispatchUi({ type: "closeSidebar" })}
+              onClick={closeSidebar}
               className="rounded-full p-2 text-rose-600 transition-colors hover:bg-rose-100"
               aria-label="메뉴 닫기"
             >
@@ -282,42 +365,7 @@ const HomeLayout = () => {
             </button>
           </div>
 
-          <div className="space-y-2">
-            <p className="hidden text-xs font-bold uppercase tracking-[0.3em] text-rose-400 lg:block">
-              Navigation
-            </p>
-            <nav className="flex flex-col gap-2">
-              <NavLink to="/" end className={sidebarLinkClass}>
-                홈
-              </NavLink>
-              {isLoggedIn ? (
-                <>
-                  <NavLink to="/mypage" className={sidebarLinkClass}>
-                    마이페이지
-                  </NavLink>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      dispatchUi({ type: "openWithdrawModal" });
-                      setAuthActionError("");
-                    }}
-                    className="rounded-2xl px-4 py-3 text-left text-sm font-semibold text-red-500 transition-colors hover:bg-rose-50"
-                  >
-                    탈퇴하기
-                  </button>
-                </>
-              ) : (
-                <>
-                  <NavLink to="/login" className={sidebarLinkClass}>
-                    로그인
-                  </NavLink>
-                  <NavLink to="/signup" className={sidebarLinkClass}>
-                    회원가입
-                  </NavLink>
-                </>
-              )}
-            </nav>
-          </div>
+          {sidebarContent}
         </aside>
 
         <main className="min-w-0 flex-1">

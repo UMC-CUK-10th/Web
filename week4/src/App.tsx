@@ -23,25 +23,18 @@ const publicRoutes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "v1/auth/google/callback", element: <GooglePage /> },
+      {
+        element: <ProtectedLayout />,
+        children: [
+          { path: "mypage", element: <MyPage /> },
+          { path: "lp/:lpid", element: <LpDetailPage /> },
+        ],
+      },
     ],
   },
 ];
 
-const protectedRoutes: RouteObject[] = [
-  {
-    path: "/mypage",
-    element: <ProtectedLayout />,
-    errorElement: <NotFoundPage />,
-    children: [{ index: true, element: <MyPage /> }],
-  },
-  {
-    path: "/lp/:lpid",
-    element: <ProtectedLayout />,
-    children: [{ index: true, element: <LpDetailPage /> }],
-  },
-];
-
-const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
+const router = createBrowserRouter(publicRoutes);
 
 function App() {
   return (
