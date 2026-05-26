@@ -1,6 +1,6 @@
+
 export default function Home() {
     const items = ["🐹", "🌻", "🐹", "🍌", "🐹", "🍎", "🐹", "🌼"];
-
 
     return (
         <div className="flex justify-center items-center h-screen w-full">
