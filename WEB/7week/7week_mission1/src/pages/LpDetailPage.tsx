@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import { useGetLpDetail } from "../hooks/queries/useGetLpDetail";
 import { useGetComments } from "../hooks/queries/useGetComments";
@@ -14,14 +14,16 @@ import { useDeleteLp } from "../hooks/mutations/useDeleteLp";
 export default function LpDetailPage() {
   const { lpid } = useParams();
   const lpId = Number(lpid);
-  const navigate = useNavigate();
+
   const { ref, inView } = useInView();
 
   const { data: myInfo } = useGetMyInfo();
   const currentUserId = myInfo?.data?.id;
 
   const { data: lpData, isLoading: isLpLoading } = useGetLpDetail(lpId);
+
   const [commentOrder, setCommentOrder] = useState<"asc" | "desc">("desc");
+
   const {
     data: commentData,
     fetchNextPage,
@@ -31,32 +33,49 @@ export default function LpDetailPage() {
 
   const { mutate: postLike } = usePostLike();
   const { mutate: deleteLike } = useDeleteLike();
+
   const { mutate: createComment } = useCreateComment();
   const { mutate: deleteComment } = useDeleteComment();
   const { mutate: updateComment } = useUpdateComment();
+
   const { mutate: deleteLp } = useDeleteLp();
 
   const [commentInput, setCommentInput] = useState("");
 
   const isMyLp = lpData?.authorId === currentUserId;
-  const isLiked = lpData?.isLiked || false;
+
+  const isLiked =
+    lpData?.likes?.some(
+      (like: any) => like.userId === currentUserId
+    ) || false;
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleLikeToggle = () => {
-    if (isLiked) deleteLike(lpId);
-    else postLike(lpId);
+    if (isLiked) {
+      deleteLike({ lpId });
+    } else {
+      postLike({ lpId });
+    }
   };
 
   const handleCommentSubmit = () => {
     if (!commentInput.trim()) return;
+
     createComment(
-      { lpId, content: commentInput },
       {
-        onSuccess: () => setCommentInput(""),
+        lpId,
+        content: commentInput,
       },
+      {
+        onSuccess: () => {
+          setCommentInput("");
+        },
+      }
     );
   };
 
@@ -66,39 +85,60 @@ export default function LpDetailPage() {
     }
   };
 
-  const handleUpdateComment = (commentId: number, currentContent: string) => {
-    const newContent = window.prompt("댓글을 수정하세요:", currentContent);
+  const handleUpdateComment = (
+    commentId: number,
+    currentContent: string
+  ) => {
+    const newContent = window.prompt(
+      "댓글을 수정하세요:",
+      currentContent
+    );
+
     if (
       newContent !== null &&
       newContent.trim() !== "" &&
       newContent !== currentContent
     ) {
-      updateComment({ lpId, commentId, content: newContent.trim() });
+      updateComment({
+        lpId,
+        commentId,
+        content: newContent.trim(),
+      });
     }
   };
 
   const handleDeleteComment = (commentId: number) => {
     if (window.confirm("정말 이 댓글을 삭제하시겠습니까?")) {
-      deleteComment({ lpId, commentId });
+      deleteComment({
+        lpId,
+        commentId,
+      });
     }
   };
 
-  if (isLpLoading) return <div className="p-8 text-white">로딩 중...</div>;
+  if (isLpLoading) {
+    return <div className="p-8 text-white">로딩 중...</div>;
+  }
 
-  const comments = commentData?.pages.flatMap((page) => page.data || []) || [];
+  const comments =
+    commentData?.pages.flatMap((page) => page.data || []) || [];
 
   return (
-    <div className="flex w-full flex-col items-center p-6 lg:p-10 bg-[#121212]">
+    <div className="flex w-full flex-col items-center bg-[#121212] p-6 lg:p-10">
       <div className="w-full max-w-[860px] rounded-[24px] bg-[#1f1f22] px-8 py-10 shadow-2xl sm:px-12">
+        
+        {/* 상단 프로필 */}
         <div className="mb-8 flex items-center justify-between border-b border-zinc-800 pb-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 font-bold text-white">
               {lpData?.author?.name?.[0] ?? "?"}
             </div>
+
             <div className="flex flex-col">
               <span className="font-bold text-white">
                 {lpData?.author?.name}
               </span>
+
               <span className="text-xs text-zinc-500">
                 {lpData?.createdAt
                   ? new Date(lpData.createdAt).toLocaleDateString()
@@ -110,14 +150,17 @@ export default function LpDetailPage() {
           {isMyLp && (
             <div className="flex gap-3 text-zinc-400">
               <button
-                onClick={() => alert("수정 기능이 준비 중입니다.")}
-                className="hover:text-white transition-colors"
+                onClick={() =>
+                  alert("수정 기능이 준비 중입니다.")
+                }
+                className="transition-colors hover:text-white"
               >
                 수정
               </button>
+
               <button
                 onClick={handleDeleteLp}
-                className="hover:text-red-500 transition-colors"
+                className="transition-colors hover:text-red-500"
               >
                 삭제
               </button>
@@ -125,10 +168,12 @@ export default function LpDetailPage() {
           )}
         </div>
 
-        <h1 className="mb-6 text-[24px] font-bold text-white sm:text-[28px] text-center">
+        {/* 제목 */}
+        <h1 className="mb-6 text-center text-[24px] font-bold text-white sm:text-[28px]">
           {lpData?.title}
         </h1>
 
+        {/* LP 이미지 */}
         <div className="mb-10 flex justify-center">
           <div className="relative aspect-square w-full max-w-[400px] overflow-hidden rounded-full border-[12px] border-zinc-900 shadow-2xl animate-[spin_10s_linear_infinite]">
             <img
@@ -136,19 +181,24 @@ export default function LpDetailPage() {
               alt="LP"
               className="h-full w-full object-cover"
             />
-            <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#121212] border-4 border-zinc-800" />
+
+            <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-zinc-800 bg-[#121212]" />
           </div>
         </div>
 
-        <p className="mx-auto mb-10 max-w-[660px] text-center text-zinc-300 leading-relaxed whitespace-pre-wrap">
+        {/* 내용 */}
+        <p className="mx-auto mb-10 max-w-[660px] whitespace-pre-wrap text-center leading-relaxed text-zinc-300">
           {lpData?.content}
         </p>
 
+        {/* 좋아요 */}
         <div className="flex justify-center border-b border-zinc-800 pb-10">
           <button
             onClick={handleLikeToggle}
             className={`flex items-center gap-2 transition-colors ${
-              isLiked ? "text-pink-500" : "text-zinc-500 hover:text-pink-500"
+              isLiked
+                ? "text-pink-500"
+                : "text-zinc-500 hover:text-pink-500"
             }`}
           >
             <svg
@@ -161,31 +211,37 @@ export default function LpDetailPage() {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
+
             <span className="text-[18px] font-bold">
-              {lpData?.likeCount || 0}
+              {lpData?.likes?.length || 0}
             </span>
           </button>
         </div>
 
+        {/* 댓글 */}
         <div className="mt-10">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white">댓글</h3>
+            <h3 className="text-lg font-bold text-white">
+              댓글
+            </h3>
+
             <div className="flex gap-3 text-sm">
               <button
                 onClick={() => setCommentOrder("desc")}
                 className={
                   commentOrder === "desc"
-                    ? "text-white font-bold"
+                    ? "font-bold text-white"
                     : "text-zinc-500"
                 }
               >
                 최신순
               </button>
+
               <button
                 onClick={() => setCommentOrder("asc")}
                 className={
                   commentOrder === "asc"
-                    ? "text-white font-bold"
+                    ? "font-bold text-white"
                     : "text-zinc-500"
                 }
               >
@@ -194,41 +250,53 @@ export default function LpDetailPage() {
             </div>
           </div>
 
+          {/* 댓글 입력 */}
           <div className="mb-10 flex gap-3">
             <input
               value={commentInput}
-              onChange={(e) => setCommentInput(e.target.value)}
+              onChange={(e) =>
+                setCommentInput(e.target.value)
+              }
               placeholder="댓글을 입력해주세요"
               className="flex-1 rounded-md bg-zinc-800 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-pink-500"
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleCommentSubmit();
+                if (e.key === "Enter") {
+                  handleCommentSubmit();
+                }
               }}
             />
+
             <button
               onClick={handleCommentSubmit}
-              className="rounded-md bg-zinc-700 px-6 font-bold text-white hover:bg-zinc-600 transition-colors"
+              className="rounded-md bg-zinc-700 px-6 font-bold text-white transition-colors hover:bg-zinc-600"
             >
               작성
             </button>
           </div>
 
+          {/* 댓글 리스트 */}
           <div className="flex flex-col gap-6">
             {comments.map((comment: any) => {
-              const isMyComment = comment.author?.id === currentUserId;
+              const isMyComment =
+                comment.author?.id === currentUserId;
 
               return (
                 <div key={comment.id} className="flex gap-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-700 font-bold text-white">
                     {comment.author?.name?.[0]}
                   </div>
+
                   <div className="flex flex-1 flex-col rounded-2xl bg-zinc-800/50 p-4">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-white">
                           {comment.author?.name}
                         </span>
+
                         <span className="text-xs text-zinc-500">
-                          {new Date(comment.createdAt).toLocaleDateString()}
+                          {new Date(
+                            comment.createdAt
+                          ).toLocaleDateString()}
                         </span>
                       </div>
 
@@ -236,27 +304,37 @@ export default function LpDetailPage() {
                         <div className="flex gap-2 text-xs text-zinc-400">
                           <button
                             onClick={() =>
-                              handleUpdateComment(comment.id, comment.content)
+                              handleUpdateComment(
+                                comment.id,
+                                comment.content
+                              )
                             }
-                            className="hover:text-white transition-colors"
+                            className="transition-colors hover:text-white"
                           >
                             수정
                           </button>
+
                           <button
-                            onClick={() => handleDeleteComment(comment.id)}
-                            className="hover:text-red-400 transition-colors"
+                            onClick={() =>
+                              handleDeleteComment(comment.id)
+                            }
+                            className="transition-colors hover:text-red-400"
                           >
                             삭제
                           </button>
                         </div>
                       )}
                     </div>
-                    <p className="text-sm text-zinc-300">{comment.content}</p>
+
+                    <p className="text-sm text-zinc-300">
+                      {comment.content}
+                    </p>
                   </div>
                 </div>
               );
             })}
           </div>
+
           <div ref={ref} className="h-10 w-full" />
         </div>
       </div>
