@@ -6,6 +6,8 @@ import LpCreateModal from "../components/LpCreateModal";
 import { LOCAL_STORAGE_KEY } from "../constants/key";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
+const USER_NAME_UPDATED_EVENT = "user-name-updated";
+
 const HomeLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +53,19 @@ const HomeLayout = () => {
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleUserNameUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ name?: string }>;
+      setCurrentUserName(customEvent.detail?.name ?? "");
+    };
+
+    window.addEventListener(USER_NAME_UPDATED_EVENT, handleUserNameUpdated);
+
+    return () => {
+      window.removeEventListener(USER_NAME_UPDATED_EVENT, handleUserNameUpdated);
+    };
+  }, []);
 
   const clearAuthState = () => {
     removeAccessToken();
