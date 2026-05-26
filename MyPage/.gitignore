@@ -1,5 +1,6 @@
-# 서버 폴더
-UMC-8th-BE/
 
 # 라이브러리 폴더
-node_modules/
+node_module/
+
+# 서버 폴더
+UMC-8th-BE
