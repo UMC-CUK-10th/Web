@@ -6,13 +6,16 @@ import LpCardSkeletonList from "../components/LpCardSkeletonList";
 import useDebounce from "../hooks/useDebounce";
 import useGetInfiniteLpList from "../hooks/useGetInfiniteLpList";
 import useSearchInfiniteLpList from "../hooks/useSearchInfiniteLpList";
+import useThrottle from "../hooks/useThrottle";
 
 const HomePage = () => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [query, setQuery] = useState("");
+  const [scrollY, setScrollY] = useState(0);
   const { ref, inView } = useInView({ threshold: 0 });
   const normalizedQuery = query.trim();
   const debouncedQuery = useDebounce(normalizedQuery, 300);
+  const throttledScrollY = useThrottle(scrollY, 200);
   const isSearchMode = normalizedQuery.length > 0;
 
   const defaultLpListQuery = useGetInfiniteLpList(30, order, !isSearchMode);
@@ -34,6 +37,32 @@ const HomePage = () => {
       fetchNextPage();
     }
   }, [fetchNextPage, hasNextPage, inView, isFetchingNextPage]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    const viewportBottom = throttledScrollY + window.innerHeight;
+    const pageBottom = document.documentElement.scrollHeight;
+    const isNearBottom = pageBottom - viewportBottom <= 240;
+
+    if (isNearBottom) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, throttledScrollY]);
 
   if (isError) {
     return <ErrorDisplay />;
