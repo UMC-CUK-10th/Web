@@ -1,0 +1,214 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.main-container {
+  min-height: 100vh;
+  background-color: #000d1a;
+  color: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: rgba(59, 130, 246, 0.8);
+  text-transform: uppercase;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-layout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.state-card {
+  background-color: #001a33;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+  transition: all 0.3s ease;
+}
+
+.state-card:hover, .company-card:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #60a5fa;
+  text-transform: uppercase;
+}
+
+.counter-value {
+  margin-top: 1rem;
+  font-size: 1.875rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.btn-group-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  flex: 1;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: #2563eb;
+  border: none;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #3b82f6;
+}
+
+.btn-primary:active, .btn-secondary:active, .btn-danger:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  flex: 1;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: rgba(30, 58, 138, 0.4);
+  border: 1px solid rgba(29, 78, 216, 0.5);
+  color: #93c5fd;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(30, 58, 138, 0.6);
+}
+
+.btn-danger {
+  padding: 0 1rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: rgba(69, 10, 10, 0.4);
+  border: 1px solid rgba(153, 27, 27, 0.5);
+  color: #f87171;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background-color: rgba(69, 10, 10, 0.7);
+}
+
+.company-card {
+  background-color: #001a33;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.company-info {
+  margin-bottom: 1.5rem;
+}
+
+.company-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+}
+
+.error-badge {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #f87171;
+  background-color: rgba(69, 10, 10, 0.3);
+  border: 1px solid rgba(153, 27, 27, 0.3);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .form-group {
+    flex-direction: row;
+  }
+}
+
+.custom-input {
+  flex: 1;
+  height: 2.75rem;
+  background-color: #001122;
+  border: 1px solid #1e3a8a;
+  padding: 0 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  color: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.custom-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.custom-input::placeholder {
+  color: rgba(30, 58, 138, 0.6);
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
