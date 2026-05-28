@@ -1,6 +1,6 @@
 import {useCallback, useState} from 'react';
 import CountButton from './components/CountButton';
-import TextInput from './components/TextImput';
+import TextInput from './components/TextInput';
 
 export default function UseCallbackPage(){
   const [count, setCount] = useState<number>(0);
