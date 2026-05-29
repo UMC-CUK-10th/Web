@@ -1,14 +1,11 @@
-import { useDispatch } from 'react-redux';
-import { clearCart } from '../features/cart/cartSlice';
-import { closeModal } from '../features/modal/modalSlice';
-import type { AppDispatch } from '../store/store';
+import { useCartStore } from '../store/useCartStore';
 
 function Modal() {
-  const dispatch = useDispatch<AppDispatch>();
+  const { clearCart, closeModal } = useCartStore();
 
   const handleConfirm = () => {
-    dispatch(clearCart());
-    dispatch(closeModal());
+    clearCart();
+    closeModal();
   };
 
   return (
@@ -26,7 +23,7 @@ function Modal() {
         <div className="mt-6 flex justify-center gap-5">
           <button
             type="button"
-            onClick={() => dispatch(closeModal())}
+            onClick={closeModal}
             className="h-12 rounded-md bg-zinc-200 px-5 text-lg font-medium text-slate-700 transition hover:bg-zinc-300"
           >
             아니요

@@ -1,25 +1,11 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import Modal from './components/Modal';
-import {
-  calculateTotals,
-  decrease,
-  increase,
-  removeItem,
-} from './features/cart/cartSlice';
-import { openModal } from './features/modal/modalSlice';
-import type { AppDispatch, RootState } from './store/store';
+import { useCartStore } from './store/useCartStore';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
 function App() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { cartItems, amount, total } = useSelector((state: RootState) => state.cart);
-  const { isOpen } = useSelector((state: RootState) => state.modal);
-
-  useEffect(() => {
-    dispatch(calculateTotals());
-  }, [cartItems, dispatch]);
+  const { cartItems, amount, total, isOpen, increase, decrease, removeItem, openModal } =
+    useCartStore();
 
   return (
     <>
@@ -46,7 +32,7 @@ function App() {
             </div>
             <button
               type="button"
-              onClick={() => dispatch(openModal())}
+              onClick={openModal}
               disabled={cartItems.length === 0}
               className="h-10 rounded-md border border-red-300 px-4 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:text-zinc-400 disabled:hover:bg-transparent"
             >
@@ -83,7 +69,7 @@ function App() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => dispatch(removeItem(item.id))}
+                      onClick={() => removeItem(item.id)}
                       className="mt-3 text-sm font-semibold text-red-600 hover:text-red-700"
                     >
                       삭제
@@ -94,7 +80,7 @@ function App() {
                     <button
                       type="button"
                       aria-label={`${item.title} 수량 증가`}
-                      onClick={() => dispatch(increase(item.id))}
+                      onClick={() => increase(item.id)}
                       className="grid h-9 w-9 place-items-center rounded-md bg-zinc-900 text-lg font-bold text-white transition hover:bg-zinc-700"
                     >
                       +
@@ -103,7 +89,7 @@ function App() {
                     <button
                       type="button"
                       aria-label={`${item.title} 수량 감소`}
-                      onClick={() => dispatch(decrease(item.id))}
+                      onClick={() => decrease(item.id)}
                       className="grid h-9 w-9 place-items-center rounded-md bg-zinc-100 text-lg font-bold text-zinc-800 transition hover:bg-zinc-200"
                     >
                       -
