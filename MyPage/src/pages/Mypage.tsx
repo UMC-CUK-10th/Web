@@ -1,48 +1,17 @@
-import { useUserContext } from "../context/UserContext";
 import { useUser } from "../hooks/useUser";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import type { UpdateUserRequest, User } from "../types/User";
+import type { UpdateUserRequest } from "../types/User";
 
 
 export default function Mypage() {
-    const { user, logout } = useUserContext();
-    const queryClient = useQueryClient();
+    
+    const { user, logout, updateUser, isUpdating } = useUser();
+
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState<UpdateUserRequest>({
         name: user?.name ?? "",
         bio: user?.bio ?? null,
         avatar: user?.avatar ?? null,
-    });
-    const { updateUser } = useUser();
-
-    const { mutate: editProfile, isPending } = useMutation({
-        mutationFn: updateUser,
-        onMutate: async (newData) => {
-            await queryClient.cancelQueries({ queryKey: ["user"] })
-
-            const previousUser = queryClient.getQueryData(["user"]);
-
-            queryClient.setQueryData(["user"], (old: User) => ({
-                ...old,
-                ...newData,
-            }));
-
-            return { previousUser };
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["user"] }),
-            setIsEditing(false);
-        },
-        onError: (error, _, context) => {
-            queryClient.setQueryData(["user"], context?.previousUser);
-            alert(error.message);
-        },
-        onSettled: () => {
-            // 성공/실패 관계없이 최종적으로 서버 데이터로 동기화
-            queryClient.invalidateQueries({ queryKey: ["user"] });
-            setIsEditing(false);
-        },
     });
 
     if (!user) return <div className="text-sm text-gray-400">유저가 없습니다.</div>;
@@ -93,11 +62,13 @@ export default function Mypage() {
 
                         <div className="flex gap-2 mt-2">
                             <button
-                                onClick={() => editProfile(form)}
-                                disabled={isPending}
+                                onClick={() => updateUser(form, {
+                                    onSuccess: () => setIsEditing(false)
+                                })}
+                                disabled={isUpdating}
                                 className="flex-1 bg-black text-white rounded-lg py-2 text-sm font-medium hover:opacity-80 transition disabled:opacity-50"
                             >
-                                {isPending ? "저장 중..." : "저장"}
+                                {isUpdating ? "저장 중..." : "저장"}
                             </button>
                             <button
                                 onClick={() => setIsEditing(false)}

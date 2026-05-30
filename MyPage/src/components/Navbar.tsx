@@ -11,11 +11,13 @@ export default function Navbar() {
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 shadow-sm">
         {/* 로고 영역 */}
         <div className="flex items-center gap-4 text-2axl font-bold text-blue-600">
-          
           <Link to="/" className="text-center">김햄찌입니다</Link>
         </div>
         { user ? (
           <div className="flex gap-6 items-center">
+            <Link to="/UseReducerCompany">
+              <span>UseReducerCompany</span>
+            </Link>
             <button onClick={logout}>로그아웃</button>
             <Link to="/mypage">
               <span>{user.name}</span>
