@@ -4,7 +4,14 @@ import {
   useSelector,
 } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
-import { increase, decrease, removeItem, clearCart, calculateTotals } from "../slices/cartSlice";
+import {
+  increase,
+  decrease,
+  removeItem,
+  clearCart,
+  calculateTotals,
+} from "../slices/cartSlice";
+import { openModal, closeModal } from "../slices/modalSlice";
 
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
@@ -22,5 +29,18 @@ export const useCartActions = () => {
     removeItem: (id: string) => dispatch(removeItem(id)),
     clearCart: () => dispatch(clearCart()),
     calculateTotals: () => dispatch(calculateTotals()),
+  };
+};
+
+export const useModalInfo = () => {
+  return useAppSelector((state) => state.modal);
+};
+
+export const useModalActions = () => {
+  const dispatch = useAppDispatch();
+
+  return {
+    openModal: () => dispatch(openModal()),
+    closeModal: () => dispatch(closeModal()),
   };
 };

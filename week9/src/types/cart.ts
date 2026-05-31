@@ -12,3 +12,7 @@ export type CartState = {
   amount: number;
   total: number;
 };
+
+export type ModalState = {
+  isOpen: boolean;
+};
