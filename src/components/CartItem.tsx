@@ -1,13 +1,13 @@
 import type { CartItemType } from '../types/cart';
+import { useCartStore } from '../store/useCartStore';
 
 interface CartItemProps {
   item: CartItemType;
-  onIncrease: (id: string) => void;
-  onDecrease: (id: string) => void;
-  onRemove: (id: string) => void;
 }
 
-const CartItem = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => {
+const CartItem = ({ item }: CartItemProps) => {
+  const { increase, decrease, removeItem } = useCartStore();
+
   return (
     <div className="flex items-center gap-4 p-4 border-b border-gray-200">
       <img
@@ -26,7 +26,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => 
 
       <div className="flex items-center gap-2 flex-shrink-0">
         <button
-          onClick={() => onIncrease(item.id)}
+          onClick={() => increase(item.id)}
           className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold text-lg flex items-center justify-center hover:bg-indigo-200 transition-colors"
         >
           +
@@ -35,7 +35,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => 
           {item.amount}
         </span>
         <button
-          onClick={() => onDecrease(item.id)}
+          onClick={() => decrease(item.id)}
           className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold text-lg flex items-center justify-center hover:bg-indigo-200 transition-colors"
         >
           -
@@ -43,7 +43,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => 
       </div>
 
       <button
-        onClick={() => onRemove(item.id)}
+        onClick={() => removeItem(item.id)}
         className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors ml-2"
         aria-label="삭제"
       >
