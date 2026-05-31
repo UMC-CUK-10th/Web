@@ -1,5 +1,5 @@
 {
-  "name": "4week_mission2",
+  "name": "9week_mission1",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,39 +7,26 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@prisma/client": "^7.6.0",
-<<<<<<< HEAD
-    "@tanstack/react-query": "^5.100.9",
-=======
->>>>>>> upstream/체컵/고원준
-    "axios": "^1.15.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router-dom": "^6.20.0",
-    "tailwindcss": "^4.2.2"
+    "@tailwindcss/vite": "^4.3.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "@tailwindcss/vite": "^4.0.0",
-<<<<<<< HEAD
-    "@tanstack/react-query-devtools": "^5.100.9",
-=======
->>>>>>> upstream/체컵/고원준
-    "@types/node": "^24.12.2",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^9.39.4",
-    "prisma": "^7.6.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
     "typescript": "~6.0.2",
-    "vite": "^8.0.4"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "typescript-eslint": "^8.59.2",
+    "vite": "^8.0.12"
   }
 }
