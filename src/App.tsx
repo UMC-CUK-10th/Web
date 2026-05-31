@@ -1,56 +1,18 @@
-import { useState, useMemo } from 'react';
-import cartItemsData from './constans/cartItems';
+import { useCartStore } from './store/useCartStore';
 import CartItem from './components/CartItem';
-import type { CartItemType } from './types/cart';
+import Modal from './components/Modal';
 
 function App() {
-  const [cartItems, setCartItems] = useState<CartItemType[]>(cartItemsData as CartItemType[]);
+  const { cartItems, openModal, getTotalAmount, getTotalPrice } = useCartStore();
 
-  // 수량 증가
-  const handleIncrease = (id: string) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, amount: item.amount + 1 } : item
-      )
-    );
-  };
-
-  // 수량 감소 (1 미만이면 삭제)
-  const handleDecrease = (id: string) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id ? { ...item, amount: item.amount - 1 } : item
-        )
-        .filter((item) => item.amount > 0)
-    );
-  };
-
-  // 개별 아이템 삭제
-  const handleRemove = (id: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // 전체 삭제
-  const handleClearAll = () => {
-    setCartItems([]);
-  };
-
-  // 총 수량
-  const totalAmount = useMemo(
-    () => cartItems.reduce((acc, item) => acc + item.amount, 0),
-    [cartItems]
-  );
-
-  // 총 금액
-  const totalPrice = useMemo(
-    () =>
-      cartItems.reduce((acc, item) => acc + Number(item.price) * item.amount, 0),
-    [cartItems]
-  );
+  const totalAmount = getTotalAmount();
+  const totalPrice = getTotalPrice();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      {/* 모달 */}
+      <Modal />
+
       {/* 헤더 */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -78,10 +40,10 @@ function App() {
           </div>
         ) : (
           <>
-            {/* 전체 삭제 버튼 */}
+            {/* 전체 삭제 버튼 → 모달 열기 */}
             <div className="flex justify-end mb-4">
               <button
-                onClick={handleClearAll}
+                onClick={openModal}
                 className="text-sm text-red-500 hover:text-red-700 border border-red-300 hover:border-red-500 px-4 py-1.5 rounded-full transition-colors"
               >
                 전체 삭제
@@ -91,13 +53,7 @@ function App() {
             {/* 장바구니 목록 */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
               {cartItems.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  onIncrease={handleIncrease}
-                  onDecrease={handleDecrease}
-                  onRemove={handleRemove}
-                />
+                <CartItem key={item.id} item={item} />
               ))}
             </div>
 
