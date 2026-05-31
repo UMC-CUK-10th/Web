@@ -1,16 +1,12 @@
-import {
-  useCartActions,
-  useCartInfo,
-  useModalActions,
-  useModalInfo,
-} from "../hooks/useCustomRedux";
+import { useCartStore } from "../store/useCartStore";
 import Modal from "./Modal";
 
 const TotalPrice = () => {
-  const { total } = useCartInfo();
-  const { isOpen } = useModalInfo();
-  const { clearCart } = useCartActions();
-  const { openModal, closeModal } = useModalActions();
+  const total = useCartStore((state) => state.total);
+  const isOpen = useCartStore((state) => state.isOpen);
+  const openModal = useCartStore((state) => state.openModal);
+  const closeModal = useCartStore((state) => state.closeModal);
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const handleConfirm = () => {
     clearCart();
@@ -33,11 +29,7 @@ const TotalPrice = () => {
         </div>
       </div>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={closeModal}
-        onConfirm={handleConfirm}
-      />
+      <Modal isOpen={isOpen} onClose={closeModal} onConfirm={handleConfirm} />
     </>
   );
 };

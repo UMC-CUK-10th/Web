@@ -1,24 +1,26 @@
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import CartList from "./components/CartList";
-import PriceBox from "./components/TotalPrice";
-import { useAppDispatch, useAppSelector } from "./hooks/useCustomRedux";
-import { calculateTotals } from "./slices/cartSlice";
+import TotalPrice from "./components/TotalPrice";
+import { useCartStore } from "./store/useCartStore";
 
 function App() {
-  const { cartItems } = useAppSelector((state) => state.cart);
-  const dispatch = useAppDispatch();
+  const cartItems = useCartStore((state) => state.cartItems);
+  const calculateTotals = useCartStore((state) => state.calculateTotals);
 
   useEffect(() => {
-    dispatch(calculateTotals());
-  }, [cartItems, dispatch]);
+    calculateTotals();
+  }, [cartItems, calculateTotals]);
 
   return (
-    <main className="min-h-screen bg-white">
+    <div className="min-h-screen w-full bg-white">
       <Navbar />
-      <CartList />
-      <PriceBox />
-    </main>
+
+      <main className="w-full">
+        <CartList />
+        <TotalPrice />
+      </main>
+    </div>
   );
 }
 
