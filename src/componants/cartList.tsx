@@ -1,10 +1,8 @@
-// App.tsx 또는 CartList.tsx
-import { useSelector } from 'react-redux'
-import type { RootState } from '../store'
+import useCartStore from '../zustandStore'
 import CartItem from './cartItem'
 
 export default function CartList() {
-  const items = useSelector((state: RootState) => state.cart.items)
+  const { items } = useCartStore()
 
   return (
     <div className="flex flex-col gap-2 p-4">

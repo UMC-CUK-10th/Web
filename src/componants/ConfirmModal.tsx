@@ -1,21 +1,17 @@
-import { useSelector, useDispatch } from 'react-redux'
-import type { RootState } from '../store'
-import { closeModal } from '../features/modal/modalSlice'
-import { clearAll } from '../features/cart/cartSlice'
+import useCartStore from "../zustandStore"
 
 export default function ConfirmModal() {
-  const dispatch = useDispatch()
-  const isOpen = useSelector((state: RootState) => state.modal.isOpen)
+  const { isModalOpen, clearAll, closeModal } = useCartStore()
 
-  if (!isOpen) return null
+  if (!isModalOpen) return null
 
   const handleConfirm = () => {
-    dispatch(clearAll())
-    dispatch(closeModal())
+    clearAll()
+    closeModal()
   }
 
   const handleCancel = () => {
-    dispatch(closeModal())
+    closeModal()
   }
 
   return (
