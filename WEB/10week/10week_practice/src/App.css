@@ -1,0 +1,117 @@
+
+:root {
+  --bg-gradient: linear-gradient(180deg, #051510 0%, #0a2119 50%, #030d0a 100%);
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --panel-bg: #05140f;
+  --emerald-accent: #34d399;
+  --emerald-glow: rgba(52, 211, 153, 0.15);
+  --border-light: rgba(255, 255, 255, 0.08);
+  --text-muted: #6b7c85;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.main-container {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.content-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.badge-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--emerald-accent);
+  text-transform: uppercase;
+  background: var(--emerald-glow);
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.main-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+}
+
+.main-title .highlight {
+  color: var(--emerald-accent);
+  position: relative;
+}
+
+.interactive-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.interactive-wrapper:last-child {
+  margin-bottom: 0;
+}
+
+.display-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.panel-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.panel-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+  word-break: break-all;
+  transition: color 0.2s ease;
+}
+
+.text-emerald {
+  color: var(--emerald-accent);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
