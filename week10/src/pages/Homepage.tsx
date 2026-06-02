@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import MovieFilter from "../components/MovieFilter";
 import MovieList from "../components/MovieList";
 import useFetch from "../hooks/useFetch"
-import type{ MovieResponse, MovieFilters, Movie } from "../types/movie";
+import type{ MovieResponse, MovieFilters} from "../types/movie";
 
 export default function HomePage() {
     const [filter, setFilter] = useState<MovieFilters>({
