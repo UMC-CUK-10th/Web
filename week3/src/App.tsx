@@ -17,11 +17,23 @@ const router = createBrowserRouter([
         element: <Homepage />,
       },
       {
-        path: "movies/:category",
-        element: <MoviePage />,
+        path: "movies/popular",
+        element: <MoviePage category="popular" />,
       },
       {
-        path: "movie/:id",
+        path: "movies/now_playing",
+        element: <MoviePage category="now_playing" />,
+      },
+      {
+        path: "movies/top_rated",
+        element: <MoviePage category="top_rated" />,
+      },
+      {
+        path: "movies/upcoming",
+        element: <MoviePage category="upcoming" />,
+      },
+      {
+        path: "movies/:movieId",
         element: <MovieDetailPage />,
       },
     ],
