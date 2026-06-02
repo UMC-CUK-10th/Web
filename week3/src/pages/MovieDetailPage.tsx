@@ -8,7 +8,7 @@ const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 const MovieDetailPage = () => {
-  const { id } = useParams();
+  const { movieId } = useParams();
 
   const headers = useMemo(
     () => ({
@@ -21,7 +21,7 @@ const MovieDetailPage = () => {
     data: movie,
     isLoading: isMovieLoading,
     error: movieError,
-  } = useCustomFetch<Movie>(id ? `${BASE_URL}/movie/${id}` : null, {
+  } = useCustomFetch<Movie>(movieId ? `${BASE_URL}/movie/${movieId}` : null, {
     params: { language: "ko-KR" },
     headers,
     errorMessage: "영화 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
@@ -32,7 +32,7 @@ const MovieDetailPage = () => {
     isLoading: isCreditsLoading,
     error: creditsError,
   } = useCustomFetch<MovieCreditResponse>(
-    id ? `${BASE_URL}/movie/${id}/credits` : null,
+    movieId ? `${BASE_URL}/movie/${movieId}/credits` : null,
     {
       params: { language: "ko-KR" },
       headers,

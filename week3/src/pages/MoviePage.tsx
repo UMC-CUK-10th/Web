@@ -2,12 +2,14 @@ import { useMemo, useState } from "react";
 import type { Movie, MovieResponse } from "../types/movie";
 import MovieCard from "../components/MovieCard";
 import { LoadingSpinner } from "../components/LoadingSpinner.tsx";
-import { useParams } from "react-router-dom";
 import { useCustomFetch } from "../hooks/useCustomFetch";
 
-export default function MoviePage() {
+type MoviePageProps = {
+  category: "popular" | "now_playing" | "top_rated" | "upcoming";
+};
+
+export default function MoviePage({ category }: MoviePageProps) {
   const [page, setPage] = useState(1);
-  const category = useParams<{ category: string }>();
 
   const headers = useMemo(
     () => ({
@@ -17,9 +19,7 @@ export default function MoviePage() {
   );
 
   const { data, isLoading, error } = useCustomFetch<MovieResponse>(
-    category.category
-      ? `https://api.themoviedb.org/3/movie/${category.category}`
-      : null,
+    `https://api.themoviedb.org/3/movie/${category}`,
     {
       params: {
         language: "en-US",

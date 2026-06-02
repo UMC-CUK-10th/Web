@@ -17,7 +17,7 @@ export default function MovieCard({ movie, onSelect }: MovieCardProps) {
       return;
     }
 
-    navigate(`/movie/${movie.id}`);
+    navigate(`/movies/${movie.id}`);
   };
 
   return (
